@@ -18,13 +18,8 @@ int main(void)
 {
 	hwInit();
 
-	uint8_t i;
-
+	segmNum(-1079, 1);
 	while (1) {
-		for (i = BR_MIN; i <= BR_MAX; i++) {
-			setBrightness(i);
-			_delay_ms(500);
-		}
 	}
 
 	return 0;

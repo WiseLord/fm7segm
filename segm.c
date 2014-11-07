@@ -2,8 +2,11 @@
 
 #include "avr/interrupt.h"
 
-static volatile uint8_t ind[] = {CH_1, CH_7 | BIT_P, CH_0, CH_1};
-static volatile uint8_t br = 0;
+static volatile uint8_t br = 0;						/* Brightness */
+
+static volatile uint8_t ind[DIGITS];
+
+static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
 void segmInit(void)
 {
@@ -25,7 +28,7 @@ void segmInit(void)
 	TCCR0 |= (0<<CS02) | (1<<CS01) | (0<<CS00);		/* Set timer prescaller to 8 */
 	TCNT0 = 0;
 
-	setBrightness(BR_MAX);
+	segmBrightness(BR_MAX);
 
 	return;
 }
@@ -98,19 +101,47 @@ ISR (TIMER0_OVF_vect)
 	}
 
 	duty++;
-	if (duty >= 8) {
+	if (duty >= BR_MAX) {
 		duty = 0;
 		pos++;
-		if (pos >= 4)
+		if (pos >= DIGITS)
 			pos = 0;
 	}
 
 	return;
 }
 
-void setBrightness(uint8_t value)
+void segmBrightness(uint8_t value)
 {
 	br = value;
+
+	return;
+}
+
+void segmNum(int16_t number, uint8_t dotPos)
+{
+	uint8_t neg = 0;
+	uint8_t i;
+
+	for (i = 0; i < DIGITS; i++)
+		ind[i] = 0;
+
+	if (number < 0) {
+		neg = 1;
+		number = -number;
+	}
+
+	for (i = 0; i < DIGITS; i++) {
+		if (number == 0 && i > dotPos)
+			break;
+		ind[i] = num[number % 10];
+		if (i == dotPos && i)
+			ind[i] |= BIT_P;
+		number /= 10;
+	}
+
+	if (neg)
+		ind[i] = BIT_G;
 
 	return;
 }

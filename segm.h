@@ -6,6 +6,8 @@
 #define BR_MIN		1
 #define BR_MAX		8
 
+#define DIGITS		4
+
 #define BIT_A		(1<<0)
 #define BIT_B		(1<<1)
 #define BIT_C		(1<<2)
@@ -27,7 +29,7 @@
 #define CH_9		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_F | BIT_G)
 
 void segmInit(void);
-
-void setBrightness(uint8_t value);
+void segmBrightness(uint8_t value);
+void segmNum(int16_t number, uint8_t dot);
 
 #endif // SEGM_H
