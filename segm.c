@@ -3,6 +3,7 @@
 #include "avr/interrupt.h"
 
 static volatile uint8_t ind[] = {CH_1, CH_7 | BIT_P, CH_0, CH_1};
+static volatile uint8_t br = 0;
 
 void segmInit(void)
 {
@@ -21,17 +22,18 @@ void segmInit(void)
 	DDR(DIG_3) |= DIG_3_LINE;
 
 	TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
-	TCCR0 |= (0<<CS02) | (1<<CS01) | (1<<CS00);		/* Set timer prescaller to 64 */
+	TCCR0 |= (0<<CS02) | (1<<CS01) | (0<<CS00);		/* Set timer prescaller to 8 */
 	TCNT0 = 0;
+
+	setBrightness(BR_MAX);
 
 	return;
 }
 
 ISR (TIMER0_OVF_vect)
 {
-	TCCR0 = 130;									/* 8000000 / 64 / (255 - 130) = 1000 Hz */
-
 	static uint8_t pos = 0;
+	static uint8_t duty = 0;
 
 	uint8_t dig = 0;
 
@@ -78,24 +80,37 @@ ISR (TIMER0_OVF_vect)
 		PORT(SEG_P) &= ~SEG_P_LINE;
 
 	/* Switch on current digit */
-	switch (pos) {
-	case 3:
-		PORT(DIG_3) |= DIG_3_LINE;
-		break;
-	case 2:
-		PORT(DIG_2) |= DIG_2_LINE;
-		break;
-	case 1:
-		PORT(DIG_1) |= DIG_1_LINE;
-		break;
-	default:
-		PORT(DIG_0) |= DIG_0_LINE;
-		break;
+	if (br > duty) {
+		switch (pos) {
+		case 3:
+			PORT(DIG_3) |= DIG_3_LINE;
+			break;
+		case 2:
+			PORT(DIG_2) |= DIG_2_LINE;
+			break;
+		case 1:
+			PORT(DIG_1) |= DIG_1_LINE;
+			break;
+		default:
+			PORT(DIG_0) |= DIG_0_LINE;
+			break;
+		}
 	}
 
-	pos++;
-	if (pos > 3)
-		pos = 0;
+	duty++;
+	if (duty >= 8) {
+		duty = 0;
+		pos++;
+		if (pos >= 4)
+			pos = 0;
+	}
+
+	return;
+}
+
+void setBrightness(uint8_t value)
+{
+	br = value;
 
 	return;
 }

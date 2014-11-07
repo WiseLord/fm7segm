@@ -3,6 +3,9 @@
 
 #include "pins.h"
 
+#define BR_MIN		1
+#define BR_MAX		8
+
 #define BIT_A		(1<<0)
 #define BIT_B		(1<<1)
 #define BIT_C		(1<<2)
@@ -24,5 +27,7 @@
 #define CH_9		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_F | BIT_G)
 
 void segmInit(void);
+
+void setBrightness(uint8_t value);
 
 #endif // SEGM_H
