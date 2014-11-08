@@ -33,6 +33,9 @@ clean:
 flash: $(TARG)
 	$(AVRDUDE) -p $(MCU) -U flash:w:$(TARG).hex:i
 
+eeprom:
+	$(AVRDUDE) -p $(MCU) -U eeprom:w:$(TARG).eep:r
+
 fuse:
 	$(AVRDUDE) -p $(MCU) -U lfuse:w:0x24:m -U hfuse:w:0xc1:m
 

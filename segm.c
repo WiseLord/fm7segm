@@ -2,7 +2,7 @@
 
 #include "avr/interrupt.h"
 
-static volatile uint8_t br = 0;						/* Brightness */
+#include "ds1307.h"
 
 static volatile uint8_t ind[DIGITS];
 
@@ -28,15 +28,12 @@ void segmInit(void)
 	TCCR0 |= (0<<CS02) | (1<<CS01) | (0<<CS00);		/* Set timer prescaller to 8 */
 	TCNT0 = 0;
 
-	segmBrightness(BR_MAX);
-
 	return;
 }
 
 ISR (TIMER0_OVF_vect)
 {
 	static uint8_t pos = 0;
-	static uint8_t duty = 0;
 
 	uint8_t dig = 0;
 
@@ -83,37 +80,24 @@ ISR (TIMER0_OVF_vect)
 		PORT(SEG_P) &= ~SEG_P_LINE;
 
 	/* Switch on current digit */
-	if (br > duty) {
-		switch (pos) {
-		case 3:
-			PORT(DIG_3) |= DIG_3_LINE;
-			break;
-		case 2:
-			PORT(DIG_2) |= DIG_2_LINE;
-			break;
-		case 1:
-			PORT(DIG_1) |= DIG_1_LINE;
-			break;
-		default:
-			PORT(DIG_0) |= DIG_0_LINE;
-			break;
-		}
+	switch (pos) {
+	case 3:
+		PORT(DIG_3) |= DIG_3_LINE;
+		pos = 0;
+		break;
+	case 2:
+		PORT(DIG_2) |= DIG_2_LINE;
+		pos = 3;
+		break;
+	case 1:
+		PORT(DIG_1) |= DIG_1_LINE;
+		pos = 2;
+		break;
+	default:
+		PORT(DIG_0) |= DIG_0_LINE;
+		pos = 1;
+		break;
 	}
-
-	duty++;
-	if (duty >= BR_MAX) {
-		duty = 0;
-		pos++;
-		if (pos >= DIGITS)
-			pos = 0;
-	}
-
-	return;
-}
-
-void segmBrightness(uint8_t value)
-{
-	br = value;
 
 	return;
 }
@@ -135,13 +119,36 @@ void segmNum(int16_t number, uint8_t dotPos)
 		if (number == 0 && i > dotPos)
 			break;
 		ind[i] = num[number % 10];
-		if (i == dotPos && i)
+		if (i == (dotPos % DIGITS) && i)
 			ind[i] |= BIT_P;
 		number /= 10;
 	}
 
 	if (neg)
 		ind[i] = BIT_G;
+
+	return;
+}
+
+void segmTimeHM(void)
+{
+	int8_t *time;
+	uint8_t timeDot;
+
+	time = readTime();
+
+	timeDot = 8;
+	if (time[SEC] % 2)
+		timeDot = 6;
+
+	segmNum(100 * time[HOUR] + time[MIN], timeDot);
+
+	return;
+}
+
+void segmFreq(uint16_t freq)
+{
+	segmNum(freq/10, 1);
 
 	return;
 }
