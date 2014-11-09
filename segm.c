@@ -7,6 +7,8 @@
 static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
+static volatile uint8_t brightness = 1;
+
 static volatile int8_t encCnt;
 static volatile uint8_t cmdBuf;
 static volatile uint8_t encPrev = ENC_0;
@@ -48,7 +50,7 @@ void segmInit(void)
 	PORT(ENCODER_B) |= ENCODER_B_LINE;
 
 	TIMSK |= (1<<TOIE2);							/* Enable timer overflow interrupt */
-	TCCR2 |= (0<<CS22) | (1<<CS21) | (1<<CS20);		/* Set timer prescaller to 32 */
+	TCCR2 |= (0<<CS22) | (1<<CS21) | (0<<CS20);		/* Set timer prescaller to 8 */
 	TCNT2 = 0;
 
 	encCnt = 0;
@@ -57,13 +59,18 @@ void segmInit(void)
 	return;
 }
 
-ISR (TIMER2_OVF_vect)								/* 8000000 / 32 / 256 = 976 polls/sec */
+ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 {
 	static uint8_t pos = 0;
 
 	uint8_t dig = 0;
 
 	dig = ind[pos];
+
+	static uint8_t brPwm;
+	brPwm++;
+	if (brPwm > BR_MAX)
+		brPwm = 0;
 
 	/* Switch off segments */
 	PORT(SEG_A) &= ~SEG_A_LINE;
@@ -75,47 +82,49 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 32 / 256 = 976 polls/sec */
 	PORT(SEG_G) &= ~SEG_G_LINE;
 	PORT(SEG_P) &= ~SEG_P_LINE;
 
-	/* Change current digit */
-	switch (pos) {
-	case 3:
-		PORT(DIG_2) &= ~DIG_2_LINE;
-		PORT(DIG_3) |= DIG_3_LINE;
-		pos = 0;
-		break;
-	case 2:
-		PORT(DIG_1) &= ~DIG_1_LINE;
-		PORT(DIG_2) |= DIG_2_LINE;
-		pos = 3;
-		break;
-	case 1:
-		PORT(DIG_0) &= ~DIG_0_LINE;
-		PORT(DIG_1) |= DIG_1_LINE;
-		pos = 2;
-		break;
-	default:
-		PORT(DIG_3) &= ~DIG_3_LINE;
-		PORT(DIG_0) |= DIG_0_LINE;
-		pos = 1;
-		break;
-	}
+	if (brPwm > 0 && brPwm <= brightness) {
+		/* Change current digit */
+		switch (pos) {
+		case 3:
+			PORT(DIG_2) &= ~DIG_2_LINE;
+			PORT(DIG_3) |= DIG_3_LINE;
+			pos = 0;
+			break;
+		case 2:
+			PORT(DIG_1) &= ~DIG_1_LINE;
+			PORT(DIG_2) |= DIG_2_LINE;
+			pos = 3;
+			break;
+		case 1:
+			PORT(DIG_0) &= ~DIG_0_LINE;
+			PORT(DIG_1) |= DIG_1_LINE;
+			pos = 2;
+			break;
+		default:
+			PORT(DIG_3) &= ~DIG_3_LINE;
+			PORT(DIG_0) |= DIG_0_LINE;
+			pos = 1;
+			break;
+		}
 
-	/* Set data on segments */
-	if (dig & BIT_A)
-		PORT(SEG_A) |= SEG_A_LINE;
-	if (dig & BIT_B)
-		PORT(SEG_B) |= SEG_B_LINE;
-	if (dig & BIT_C)
-		PORT(SEG_C) |= SEG_C_LINE;
-	if (dig & BIT_D)
-		PORT(SEG_D) |= SEG_D_LINE;
-	if (dig & BIT_E)
-		PORT(SEG_E) |= SEG_E_LINE;
-	if (dig & BIT_F)
-		PORT(SEG_F) |= SEG_F_LINE;
-	if (dig & BIT_G)
-		PORT(SEG_G) |= SEG_G_LINE;
-	if (dig & BIT_P)
-		PORT(SEG_P) |= SEG_P_LINE;
+		/* Set data on segments */
+		if (dig & BIT_A)
+			PORT(SEG_A) |= SEG_A_LINE;
+		if (dig & BIT_B)
+			PORT(SEG_B) |= SEG_B_LINE;
+		if (dig & BIT_C)
+			PORT(SEG_C) |= SEG_C_LINE;
+		if (dig & BIT_D)
+			PORT(SEG_D) |= SEG_D_LINE;
+		if (dig & BIT_E)
+			PORT(SEG_E) |= SEG_E_LINE;
+		if (dig & BIT_F)
+			PORT(SEG_F) |= SEG_F_LINE;
+		if (dig & BIT_G)
+			PORT(SEG_G) |= SEG_G_LINE;
+		if (dig & BIT_P)
+			PORT(SEG_P) |= SEG_P_LINE;
+	}
 
 	/* Handling buttons and encoder events */
 
@@ -280,10 +289,20 @@ uint8_t getBtnCmd(void)
 
 void setDisplayTime(uint16_t value)
 {
-	displayTime = value;
+	displayTime = value << 2;
 }
 
 uint16_t getDisplayTime(void)
 {
-	return displayTime;
+	return displayTime >> 2;
+}
+
+void setBrightness(uint8_t value)
+{
+	if (value > BR_MAX)
+		value = BR_MAX;
+
+	brightness = value;
+
+	return;
 }

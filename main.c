@@ -18,6 +18,8 @@ static void powerOn(void)
 
 	unmuteVolume();
 
+	setBrightness(BR_WORK);
+
 	return;
 }
 
@@ -30,6 +32,8 @@ static void powerOff(void)
 
 	volumeSaveParams();
 	tea5767SaveParams();
+
+	setBrightness(BR_STBY);
 
 	return;
 }

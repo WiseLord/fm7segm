@@ -3,6 +3,11 @@
 
 #include "pins.h"
 
+#define BR_MIN		0
+#define BR_MAX		8
+#define BR_STBY		1
+#define BR_WORK		8
+
 #define DIGITS		4
 
 #define BIT_A		(1<<0)
@@ -62,8 +67,8 @@ enum {
 };
 
 // Handling long press actions */
-#define SHORT_PRESS		100
-#define LONG_PRESS		600
+#define SHORT_PRESS		400
+#define LONG_PRESS		2400
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
@@ -76,5 +81,7 @@ uint8_t getBtnCmd(void);
 
 void setDisplayTime(uint16_t value);
 uint16_t getDisplayTime(void);
+
+void setBrightness(uint8_t value);
 
 #endif // SEGM_H
