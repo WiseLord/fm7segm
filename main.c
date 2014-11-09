@@ -5,7 +5,7 @@
 #include "segm.h"
 #include "i2c.h"
 #include "ds1307.h"
-#include "tuner.h"
+#include "tea5767.h"
 
 #include "pins.h"
 
@@ -14,8 +14,6 @@ void hwInit(void)
 	segmInit();							/* Indicator */
 	I2CInit();							/* I2C bus */
 	ds1307Init();						/* RTC */
-
-	tunerInit();
 
 	sei();
 
@@ -26,14 +24,14 @@ int main(void)
 {
 	hwInit();
 
-	loadTunerParams();
+	tea5767LoadParams();
 
-	tunerSetFreq(9950);
+	tea5767SetFreq(9950);
 
 	while (1) {
 //		segmTimeHM();
-		segmFreq(tunerGetFreq());
-		_delay_ms(10);
+		segmFmFreq(tea5767GetFreq());
+		_delay_ms(50);
 	}
 
 	return 0;

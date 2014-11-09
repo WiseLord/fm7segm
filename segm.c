@@ -146,7 +146,7 @@ void segmTimeHM(void)
 	return;
 }
 
-void segmFreq(uint16_t freq)
+void segmFmFreq(uint16_t freq)
 {
 	segmNum(freq/10, 1);
 

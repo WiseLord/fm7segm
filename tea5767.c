@@ -1,27 +1,10 @@
 #include "tea5767.h"
 
-#include "i2c.h"
-#include "eeprom.h"
 #include <avr/eeprom.h>
+#include "i2c.h"
 
-static uint8_t buf[5];
-
-static uint8_t ctrl;
-
-#define TEA5767_HCC_CTRL		(1<<6)
-#define TEA5767_SNC_CTRL		(1<<5)
-#define TEA5767_SMUTE_CTRL		(1<<4)
-#define TEA5767_DTC_CTRL		(1<<3)
-#define TEA5767_BL_CTRL			(1<<2)
-#define TEA5767_PLLREF_CTRL		(1<<1)
-#define TEA5767_XTAL_CTRL		(1<<0)
-
-void tea5767Init(void)
-{
-	ctrl = eeprom_read_byte(eepromFMCtrl);
-
-	return;
-}
+static uint8_t bufFM[5];
+static uint16_t freqFM;
 
 static void tea5767WriteI2C(uint8_t *buf)
 {
@@ -36,61 +19,148 @@ static void tea5767WriteI2C(uint8_t *buf)
 	return;
 }
 
-void tea5767SetFreq(uint16_t freq, uint8_t mono)
+void tea5767SetFreq(uint16_t freq)
 {
 	uint16_t div;
 
-	uint32_t fq = (uint32_t)freq * 10000 + 225000;
+	if (freq > FM_FREQ_MAX)
+		freq = FM_FREQ_MIN;
+	if (freq < FM_FREQ_MIN)
+		freq = FM_FREQ_MAX;
 
-	uint8_t tmpBuf;
+	freqFM = freq;
 
-	if (ctrl & TEA5767_XTAL_CTRL)
-		div = fq / 8192;
-	else
-		div = fq / 12500;
+	div = ((uint32_t)freq * 10000 + 225000) / 8192;
 
-	buf[0] = (div >> 8) & 0x3F;
+	bufFM[0] = (div >> 8) & 0x3F;
+	bufFM[1] = div & 0xff;
+	bufFM[2] = TEA5767_HLSI | TEA5767_MS;
+	bufFM[3] = TEA5767_HCC | TEA5767_SNC | TEA5767_SMUTE| TEA5767_XTAL;
+	bufFM[4] = 0;
 
-	buf[1] = div & 0xff;
-
-	tmpBuf = TEA5767_HLSI;
-	if (mono)
-		tmpBuf |= TEA5767_MS;
-	buf[2] = tmpBuf;
-
-	tmpBuf = 0;
-	if (ctrl & TEA5767_HCC_CTRL)
-		tmpBuf |= TEA5767_HCC;
-	if (ctrl & TEA5767_SNC_CTRL)
-		tmpBuf |= TEA5767_SNC;
-	if (ctrl & TEA5767_SMUTE_CTRL)
-		tmpBuf |= TEA5767_SMUTE;
-	if (ctrl & TEA5767_BL_CTRL)
-		tmpBuf |= TEA5767_BL;
-	if (ctrl & TEA5767_XTAL_CTRL)
-		tmpBuf |= TEA5767_XTAL;
-	buf[3] = tmpBuf;
-
-	tmpBuf = 0;
-	if (ctrl & TEA5767_DTC_CTRL)
-		tmpBuf |= TEA5767_DTC;
-	if (ctrl & TEA5767_PLLREF_CTRL)
-		tmpBuf |= TEA5767_PLLREF;
-	buf[4] = tmpBuf;
-
-	tea5767WriteI2C(buf);
+	tea5767WriteI2C(bufFM);
 
 	return;
 }
 
-void tea5767ReadStatus(uint8_t *buf)
+uint16_t tea5767GetFreq()
+{
+	return freqFM;
+}
+
+void tea5767IncFreq(void)
+{
+	tea5767SetFreq(freqFM + FM_STEP);
+
+	return;
+}
+
+void tea5767DecFreq(void)
+{
+	tea5767SetFreq(freqFM - FM_STEP);
+
+	return;
+}
+
+/* Find station number (1..64) in EEPROM */
+uint8_t tea5767StNum(uint16_t freq)
 {
 	uint8_t i;
 
-	I2CStart(TEA5767_ADDR | I2C_READ);
-	for (i = 0; i < 5; i++)
-		I2CReadByte(&buf[i], 1);
-	I2CStop();
+	for (i = 0; i < FM_COUNT; i++)
+		if (eeprom_read_word(eepromStations + i) == freq)
+			return i + 1;
+
+	return 0;
+}
+
+/* Find nearest next/prev stored station */
+void tea5767ScanStoredFreq(uint8_t direction)
+{
+	uint8_t i;
+	uint16_t freqCell;
+	uint16_t freqFound = freqFM;
+
+	for (i = 0; i < FM_COUNT; i++) {
+		freqCell = eeprom_read_word(eepromStations + i);
+		if (freqCell != 0xFFFF) {
+			if (direction) {
+				if (freqCell > freqFM) {
+					freqFound = freqCell;
+					break;
+				}
+			} else {
+				if (freqCell < freqFM) {
+					freqFound = freqCell;
+				} else {
+					break;
+				}
+			}
+		}
+	}
+
+	tea5767SetFreq(freqFound);
+
+	return;
+}
+
+/* Load station by number */
+void tea5767LoadStation(uint8_t num)
+{
+	uint16_t freqCell = eeprom_read_word(eepromStations + num);
+
+	if (freqCell != 0xFFFF)
+		tea5767SetFreq(freqCell);
+
+	return;
+}
+
+/* Save/delete station from eeprom */
+void tea5767StoreStation(void)
+{
+	uint8_t i, j;
+	uint16_t freqCell;
+	uint16_t freq;
+
+	freq = freqFM;
+
+	for (i = 0; i < FM_COUNT; i++) {
+		freqCell = eeprom_read_word(eepromStations + i);
+		if (freqCell < freq)
+			continue;
+		if (freqCell == freq) {
+			for (j = i; j < FM_COUNT; j++) {
+				if (j == FM_COUNT - 1)
+					freqCell = 0xFFFF;
+				else
+					freqCell = eeprom_read_word(eepromStations + j + 1);
+				eeprom_update_word(eepromStations + j, freqCell);
+			}
+			break;
+		} else {
+			for (j = i; j < FM_COUNT; j++) {
+				freqCell = eeprom_read_word(eepromStations + j);
+				eeprom_update_word(eepromStations + j, freq);
+				freq = freqCell;
+			}
+			break;
+		}
+	}
+
+	return;
+}
+
+void tea5767LoadParams(void)
+{
+	freqFM = eeprom_read_word(eepromFMFreq);
+	tea5767SetFreq(freqFM);
+
+	return;
+}
+
+void tea5767SaveParams(void)
+{
+	eeprom_update_word(eepromFMFreq, freqFM);
 
 	return;
 }

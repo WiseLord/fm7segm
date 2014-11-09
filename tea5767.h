@@ -3,9 +3,24 @@
 
 #include <inttypes.h>
 
+#include "tea5767.h"
+
+#define FM_COUNT				64
+
+#define SEARCH_DOWN				0
+#define SEARCH_UP				1
+
+#define FM_STEP					10
+
+#define FM_FREQ_MIN				8750
+#define FM_FREQ_MAX				10800
+
 #define TEA5767_ADDR			0b11000000
 
-/* Write mode register values */
+#define eepromFMFreq			((uint16_t*)0x04)
+#define eepromStations			((uint16_t*)0x10)
+
+/* Write mode TEA5767 register values */
 
 /* 0 register */
 #define TEA5767_MUTE			(1<<7)	/* Mute output */
@@ -41,32 +56,18 @@
 #define TEA5767_DTC				(1<<6)	/* De-emphasis 75us(1) / 50us(0) */
 /* Not used 5..0 bits */
 
+void tea5767SetFreq(uint16_t freq);
+uint16_t tea5767GetFreq();
 
-/* Read mode register values */
-/* 0 register */
-#define TEA5767_RF				(1<<7)	/* Ready flag */
-#define TEA5767_BLF				(1<<6)	/* Band limit flag*/
-/* PLL 13..8 bits */
+void tea5767IncFreq(void);
+void tea5767DecFreq(void);
 
-/* 1 register */
-/* PLL 7..0 bits */
+uint8_t tea5767StNum(uint16_t freq);
+void tea5767ScanStoredFreq(uint8_t direction);
+void tea5767LoadStation(uint8_t num);
+void tea5767StoreStation(void);
 
-/* 2 register */
-#define TEA5767_STEREO			(1<<7)	/* Stereo reception */
-#define TEA5767_IF_CNT_MASK		0x7F	/* If counter result */
+void tea5767LoadParams(void);
+void tea5767SaveParams(void);
 
-/* 3 register */
-#define TEA5767_LEV_MASK		0xF0	/* ADC Level*/
-#define TEA5767_CI				0x0F	/* Chip ID(0000)*/
-
-/* 4 register */
-#define TEA5767_RESERVED_MASK	0xFF	/* Not used */
-
-#define TEA5767_BUF_READY(buf)	(buf[0] & TEA5767_RF)
-#define TEA5767_BUF_STEREO(buf)	(buf[2] & TEA5767_STEREO)
-
-void tea5767Init(void);
-void tea5767SetFreq(uint16_t freq, uint8_t mono);
-void tea5767ReadStatus(uint8_t *buf);
-
-#endif // TEA5767_H
+#endif /* TEA5767_H */

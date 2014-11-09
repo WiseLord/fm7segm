@@ -29,6 +29,6 @@ void segmInit(void);
 void segmBrightness(uint8_t value);
 void segmNum(int16_t number, uint8_t dot);
 void segmTimeHM(void);
-void segmFreq(uint16_t freq);
+void segmFmFreq(uint16_t freq);
 
 #endif // SEGM_H
