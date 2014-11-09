@@ -7,6 +7,11 @@
 static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
+static volatile int8_t encCnt;
+static volatile uint8_t encPrev = ENC_0;
+
+static volatile uint16_t displayTime;
+
 void segmInit(void)
 {
 	DDR(SEG_A) |= SEG_A_LINE;
@@ -23,19 +28,21 @@ void segmInit(void)
 	DDR(DIG_2) |= DIG_2_LINE;
 	DDR(DIG_3) |= DIG_3_LINE;
 
-	DDR(ENCODER_A) |= ENCODER_A_LINE;
-	DDR(ENCODER_B) |= ENCODER_B_LINE;
+	DDR(ENCODER_A) &= ~ENCODER_A_LINE;
+	DDR(ENCODER_B) &= ~ENCODER_B_LINE;
+
+	PORT(ENCODER_A) |= ENCODER_A_LINE;
+	PORT(ENCODER_B) |= ENCODER_B_LINE;
 
 	TIMSK |= (1<<TOIE2);							/* Enable timer overflow interrupt */
-	TCCR2 |= (0<<CS22) | (1<<CS21) | (1<<CS20);		/* Set timer prescaller to 64 */
+	TCCR2 |= (0<<CS22) | (1<<CS21) | (1<<CS20);		/* Set timer prescaller to 32 */
 	TCNT2 = 0;
 
 	return;
 }
 
-ISR (TIMER2_OVF_vect)
+ISR (TIMER2_OVF_vect)								/* 8000000 / 32 / 256 = 976 polls/sec */
 {
-	TCNT2 = 131;									/* 8000000 / 64 / (256-131) = 1000 */
 	static uint8_t pos = 0;
 
 	uint8_t dig = 0;
@@ -102,6 +109,34 @@ ISR (TIMER2_OVF_vect)
 		break;
 	}
 
+	uint8_t encNow = ENC_0;
+
+	if (~PIN(ENCODER_A) & ENCODER_A_LINE)
+		encNow |= ENC_A;
+	if (~PIN(ENCODER_B) & ENCODER_B_LINE)
+		encNow |= ENC_B;
+
+	/* If encoder event has happened, inc/dec encoder counter */
+	switch (encNow) {
+	case ENC_AB:
+		if (encPrev == ENC_B)
+			encCnt++;
+		if (encPrev == ENC_A)
+			encCnt--;
+		break;
+	case ENC_0:
+		if (encPrev == ENC_A)
+			encCnt++;
+		if (encPrev == ENC_B)
+			encCnt--;
+		break;
+	}
+	encPrev = encNow; /* Save current encoder state */
+
+	/* Timer of current display mode */
+	if (displayTime > 0)
+		displayTime--;
+
 	return;
 }
 
@@ -154,4 +189,22 @@ void segmFmFreq(uint16_t freq)
 	segmNum(freq/10, 1);
 
 	return;
+}
+
+int8_t getEncoder(void)
+{
+	int8_t ret = encCnt;
+	encCnt = 0;
+
+	return ret;
+}
+
+void setDisplayTime(uint16_t value)
+{
+	displayTime = value;
+}
+
+uint16_t getDisplayTime(void)
+{
+	return displayTime;
 }

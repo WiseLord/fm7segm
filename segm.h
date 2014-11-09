@@ -25,10 +25,31 @@
 #define CH_8		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F | BIT_G)
 #define CH_9		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_F | BIT_G)
 
+/* Display modes */
+enum {
+	MODE_STANDBY,
+	MODE_FM_RADIO,
+	MODE_VOLUME,
+	MODE_TIME,
+	MODE_TIME_EDIT
+};
+
+#define DISPLAY_TIME_VOLUME		2000
+
+#define ENC_0			0b00
+#define ENC_A			0b01
+#define ENC_B			0b10
+#define ENC_AB			0b11
+
 void segmInit(void);
 void segmBrightness(uint8_t value);
 void segmNum(int16_t number, uint8_t dot);
 void segmTimeHM(void);
 void segmFmFreq(uint16_t freq);
+
+int8_t getEncoder(void);
+
+void setDisplayTime(uint16_t value);
+uint16_t getDisplayTime(void);
 
 #endif // SEGM_H
