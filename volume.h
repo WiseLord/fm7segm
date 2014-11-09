@@ -18,4 +18,7 @@ void changeVolume(int8_t diff);
 void volumeLoadParams(void);
 void volumeSaveParams(void);
 
+void muteVolume(void);
+void unmuteVolume(void);
+
 #endif /* VOLUME_H */

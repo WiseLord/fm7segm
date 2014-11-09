@@ -10,6 +10,30 @@
 
 #include "pins.h"
 
+/* Handle leaving standby mode */
+static void powerOn(void)
+{
+	_delay_ms(50);
+	tea5767LoadParams();
+
+	unmuteVolume();
+
+	return;
+}
+
+/* Handle entering standby mode */
+static void powerOff(void)
+{
+	muteVolume();
+
+	stopEditTime();
+
+	volumeSaveParams();
+	tea5767SaveParams();
+
+	return;
+}
+
 void hwInit(void)
 {
 	segmInit();							/* Indicator */
@@ -26,22 +50,60 @@ int main(void)
 {
 	hwInit();
 
-	uint8_t dispMode = MODE_TIME;
+	uint8_t dispMode = MODE_STANDBY;
 
 	tea5767LoadParams();
 	tea5767SetFreq(9950);
 
-	DDR(ENC_GND) |= ENC_GND_LINE;
-	PORT(ENC_GND) &= ~ENC_GND_LINE;
-
-//	int8_t vol = 8;
-//	setVolume(vol);
 	volumeLoadParams();
 
 	int8_t encCnt = 0;
+	uint8_t cmd = CMD_EMPTY;
 
 	while (1) {
 		encCnt = getEncoder();
+		cmd = getBtnCmd();
+
+		/* Don't handle commands in standby mode except STBY */
+		if (dispMode == MODE_STANDBY) {
+			if (cmd != CMD_BTN_1)
+				cmd = CMD_EMPTY;
+		}
+
+		/* Handle command */
+		switch (cmd) {
+		case CMD_BTN_1:
+			switch (dispMode) {
+			case MODE_STANDBY:
+				powerOn();
+				dispMode = MODE_FM_RADIO;
+				break;
+			default:
+				powerOff();
+				dispMode = MODE_STANDBY;
+				break;
+			}
+			break;
+			dispMode = MODE_FM_RADIO;
+			setDisplayTime(DISPLAY_TIME_FM_RADIO);
+			break;
+		case CMD_BTN_2:
+			dispMode = MODE_TIME;
+			setDisplayTime(DISPLAY_TIME_TIME);
+			break;
+		case CMD_BTN_3:
+			tea5767ScanStoredFreq(SEARCH_DOWN);
+			dispMode = MODE_FM_RADIO;
+			setDisplayTime(DISPLAY_TIME_FM_RADIO);
+			break;
+		case CMD_BTN_4:
+			tea5767ScanStoredFreq(SEARCH_UP);
+			dispMode = MODE_FM_RADIO;
+			setDisplayTime(DISPLAY_TIME_FM_RADIO);
+			break;
+		default:
+			break;
+		}
 
 		/* Handle encoder */
 		if (encCnt) {
@@ -64,8 +126,7 @@ int main(void)
 			case MODE_STANDBY:
 				break;
 			default:
-				dispMode = MODE_TIME;
-				volumeSaveParams();
+				dispMode = MODE_FM_RADIO;
 				break;
 			}
 		}

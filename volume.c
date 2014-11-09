@@ -14,9 +14,7 @@ void volumeInit(void)
 {
 	DDR(VOLUME) |= VOLUME_LINE;
 
-	TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
 	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 */
-	TCNT0 = 0;
 
 	return;
 }
@@ -71,6 +69,21 @@ void volumeLoadParams(void)
 void volumeSaveParams(void)
 {
 	eeprom_update_word(eepromVolume, vol);
+
+	return;
+}
+
+void muteVolume(void)
+{
+	TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
+	PORT(VOLUME) &= ~VOLUME_LINE;
+
+	return;
+}
+
+void unmuteVolume(void)
+{
+	TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
 
 	return;
 }

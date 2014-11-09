@@ -39,11 +39,19 @@
 #define VOLUME_LINE			(1<<0)
 
 /* Encoder definitions */
-#define ENCODER_A			D
-#define ENCODER_A_LINE		(1<<2)
-#define ENC_GND				D
-#define ENC_GND_LINE		(1<<3)
-#define ENCODER_B			D
-#define ENCODER_B_LINE		(1<<4)
+#define ENCODER_A			B
+#define ENCODER_A_LINE		(1<<4)
+#define ENCODER_B			B
+#define ENCODER_B_LINE		(1<<3)
+
+/* Buttons definitions */
+#define BUTTON_1			D
+#define BUTTON_1_LINE		(1<<1)
+#define BUTTON_2			D
+#define BUTTON_2_LINE		(1<<2)
+#define BUTTON_3			D
+#define BUTTON_3_LINE		(1<<3)
+#define BUTTON_4			D
+#define BUTTON_4_LINE		(1<<4)
 
 #endif /* PINS_H */

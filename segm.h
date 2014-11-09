@@ -35,11 +35,35 @@ enum {
 };
 
 #define DISPLAY_TIME_VOLUME		2000
-
+#define DISPLAY_TIME_FM_RADIO	2000
+#define DISPLAY_TIME_TIME		2000
 #define ENC_0			0b00
 #define ENC_A			0b01
 #define ENC_B			0b10
 #define ENC_AB			0b11
+
+#define BTN_STATE_0		0b0000
+#define BTN_1			0b0001
+#define BTN_2			0b0010
+#define BTN_3			0b0100
+#define BTN_4			0b1000
+
+enum {
+	CMD_BTN_1,
+	CMD_BTN_2,
+	CMD_BTN_3,
+	CMD_BTN_4,
+	CMD_BTN_1_LONG,
+	CMD_BTN_2_LONG,
+	CMD_BTN_3_LONG,
+	CMD_BTN_4_LONG,
+
+	CMD_EMPTY = 0xEF
+};
+
+// Handling long press actions */
+#define SHORT_PRESS		100
+#define LONG_PRESS		600
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
@@ -48,6 +72,7 @@ void segmTimeHM(void);
 void segmFmFreq(uint16_t freq);
 
 int8_t getEncoder(void);
+uint8_t getBtnCmd(void);
 
 void setDisplayTime(uint16_t value);
 uint16_t getDisplayTime(void);

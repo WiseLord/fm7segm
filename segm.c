@@ -8,7 +8,9 @@ static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
 static volatile int8_t encCnt;
+static volatile uint8_t cmdBuf;
 static volatile uint8_t encPrev = ENC_0;
+static volatile uint8_t btnPrev = BTN_STATE_0;
 
 static volatile uint16_t displayTime;
 
@@ -28,8 +30,19 @@ void segmInit(void)
 	DDR(DIG_2) |= DIG_2_LINE;
 	DDR(DIG_3) |= DIG_3_LINE;
 
+	/* Setup buttons and encoder as inputs with pull-up resistors */
+	DDR(BUTTON_1) &= ~BUTTON_1_LINE;
+	DDR(BUTTON_2) &= ~BUTTON_2_LINE;
+	DDR(BUTTON_3) &= ~BUTTON_3_LINE;
+	DDR(BUTTON_4) &= ~BUTTON_4_LINE;
+
 	DDR(ENCODER_A) &= ~ENCODER_A_LINE;
 	DDR(ENCODER_B) &= ~ENCODER_B_LINE;
+
+	PORT(BUTTON_1) |= BUTTON_1_LINE;
+	PORT(BUTTON_2) |= BUTTON_2_LINE;
+	PORT(BUTTON_3) |= BUTTON_3_LINE;
+	PORT(BUTTON_4) |= BUTTON_4_LINE;
 
 	PORT(ENCODER_A) |= ENCODER_A_LINE;
 	PORT(ENCODER_B) |= ENCODER_B_LINE;
@@ -37,6 +50,9 @@ void segmInit(void)
 	TIMSK |= (1<<TOIE2);							/* Enable timer overflow interrupt */
 	TCCR2 |= (0<<CS22) | (1<<CS21) | (1<<CS20);		/* Set timer prescaller to 32 */
 	TCNT2 = 0;
+
+	encCnt = 0;
+	cmdBuf = CMD_EMPTY;
 
 	return;
 }
@@ -109,12 +125,23 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 32 / 256 = 976 polls/sec */
 		break;
 	}
 
+	static int16_t btnCnt = 0;		/* Buttons press duration value */
 	uint8_t encNow = ENC_0;
+	uint8_t btnNow = BTN_STATE_0;
 
 	if (~PIN(ENCODER_A) & ENCODER_A_LINE)
 		encNow |= ENC_A;
 	if (~PIN(ENCODER_B) & ENCODER_B_LINE)
 		encNow |= ENC_B;
+
+	if (~PIN(BUTTON_1) & BUTTON_1_LINE)
+		btnNow |= BTN_1;
+	if (~PIN(BUTTON_2) & BUTTON_2_LINE)
+		btnNow |= BTN_2;
+	if (~PIN(BUTTON_3) & BUTTON_3_LINE)
+		btnNow |= BTN_3;
+	if (~PIN(BUTTON_4) & BUTTON_4_LINE)
+		btnNow |= BTN_4;
 
 	/* If encoder event has happened, inc/dec encoder counter */
 	switch (encNow) {
@@ -132,6 +159,49 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 32 / 256 = 976 polls/sec */
 		break;
 	}
 	encPrev = encNow; /* Save current encoder state */
+
+	/* If button event has happened, place it to command buffer */
+	if (btnNow) {
+		if (btnNow == btnPrev) {
+			btnCnt++;
+			if (btnCnt == LONG_PRESS) {
+				switch (btnPrev) {
+				case BTN_1:
+					cmdBuf = CMD_BTN_1_LONG;
+					break;
+				case BTN_2:
+					cmdBuf = CMD_BTN_2_LONG;
+					break;
+				case BTN_3:
+					cmdBuf = CMD_BTN_3_LONG;
+					break;
+				case BTN_4:
+					cmdBuf = CMD_BTN_4_LONG;
+					break;
+				}
+			}
+		} else {
+			btnPrev = btnNow;
+		}
+	} else {
+		if ((btnCnt > SHORT_PRESS) && (btnCnt < LONG_PRESS)) {
+			switch (btnPrev) {
+			case BTN_1:
+				cmdBuf = CMD_BTN_1;
+				break;
+			case BTN_2:
+				cmdBuf = CMD_BTN_2;
+				break;
+			case BTN_3:
+				cmdBuf = CMD_BTN_3;
+				break;
+			case BTN_4:
+				cmdBuf = CMD_BTN_4;
+				break;
+			}
+		}
+		btnCnt = 0;
+	}
 
 	/* Timer of current display mode */
 	if (displayTime > 0)
@@ -196,6 +266,13 @@ int8_t getEncoder(void)
 	int8_t ret = encCnt;
 	encCnt = 0;
 
+	return ret;
+}
+
+uint8_t getBtnCmd(void)
+{
+	uint8_t ret = cmdBuf;
+	cmdBuf = CMD_EMPTY;
 	return ret;
 }
 
