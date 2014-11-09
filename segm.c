@@ -5,7 +5,6 @@
 #include "ds1307.h"
 
 static volatile uint8_t ind[DIGITS];
-
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
 void segmInit(void)
@@ -24,15 +23,19 @@ void segmInit(void)
 	DDR(DIG_2) |= DIG_2_LINE;
 	DDR(DIG_3) |= DIG_3_LINE;
 
-	TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
-	TCCR0 |= (0<<CS02) | (1<<CS01) | (0<<CS00);		/* Set timer prescaller to 8 */
-	TCNT0 = 0;
+	DDR(ENCODER_A) |= ENCODER_A_LINE;
+	DDR(ENCODER_B) |= ENCODER_B_LINE;
+
+	TIMSK |= (1<<TOIE2);							/* Enable timer overflow interrupt */
+	TCCR2 |= (0<<CS22) | (1<<CS21) | (1<<CS20);		/* Set timer prescaller to 64 */
+	TCNT2 = 0;
 
 	return;
 }
 
-ISR (TIMER0_OVF_vect)
+ISR (TIMER2_OVF_vect)
 {
+	TCNT2 = 131;									/* 8000000 / 64 / (256-131) = 1000 */
 	static uint8_t pos = 0;
 
 	uint8_t dig = 0;

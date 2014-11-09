@@ -35,4 +35,15 @@
 #define DIG_2				C
 #define DIG_2_LINE			(1<<3)
 
+#define VOLUME				D
+#define VOLUME_LINE			(1<<0)
+
+/* Encoder definitions */
+#define ENCODER_A			D
+#define ENCODER_A_LINE		(1<<2)
+#define ENC_GND				D
+#define ENC_GND_LINE		(1<<3)
+#define ENCODER_B			D
+#define ENCODER_B_LINE		(1<<4)
+
 #endif /* PINS_H */
