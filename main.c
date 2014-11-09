@@ -147,8 +147,6 @@ int main(void)
 			segmNum(getVolume(), 0);
 			break;
 		}
-
-		_delay_ms(100);
 	}
 
 	return 0;

@@ -63,69 +63,64 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 32 / 256 = 976 polls/sec */
 
 	uint8_t dig = 0;
 
-	/* Switch off all digits */
-	PORT(DIG_0) &= ~DIG_0_LINE;
-	PORT(DIG_1) &= ~DIG_1_LINE;
-	PORT(DIG_2) &= ~DIG_2_LINE;
-	PORT(DIG_3) &= ~DIG_3_LINE;
-
 	dig = ind[pos];
 
-	/* Set data on segments */
-	if (dig & BIT_A)
-		PORT(SEG_A) |= SEG_A_LINE;
-	else
-		PORT(SEG_A) &= ~SEG_A_LINE;
-	if (dig & BIT_B)
-		PORT(SEG_B) |= SEG_B_LINE;
-	else
-		PORT(SEG_B) &= ~SEG_B_LINE;
-	if (dig & BIT_C)
-		PORT(SEG_C) |= SEG_C_LINE;
-	else
-		PORT(SEG_C) &= ~SEG_C_LINE;
-	if (dig & BIT_D)
-		PORT(SEG_D) |= SEG_D_LINE;
-	else
-		PORT(SEG_D) &= ~SEG_D_LINE;
-	if (dig & BIT_E)
-		PORT(SEG_E) |= SEG_E_LINE;
-	else
-		PORT(SEG_E) &= ~SEG_E_LINE;
-	if (dig & BIT_F)
-		PORT(SEG_F) |= SEG_F_LINE;
-	else
-		PORT(SEG_F) &= ~SEG_F_LINE;
-	if (dig & BIT_G)
-		PORT(SEG_G) |= SEG_G_LINE;
-	else
-		PORT(SEG_G) &= ~SEG_G_LINE;
-	if (dig & BIT_P)
-		PORT(SEG_P) |= SEG_P_LINE;
-	else
-		PORT(SEG_P) &= ~SEG_P_LINE;
+	/* Switch off segments */
+	PORT(SEG_A) &= ~SEG_A_LINE;
+	PORT(SEG_B) &= ~SEG_B_LINE;
+	PORT(SEG_C) &= ~SEG_C_LINE;
+	PORT(SEG_D) &= ~SEG_D_LINE;
+	PORT(SEG_E) &= ~SEG_E_LINE;
+	PORT(SEG_F) &= ~SEG_F_LINE;
+	PORT(SEG_G) &= ~SEG_G_LINE;
+	PORT(SEG_P) &= ~SEG_P_LINE;
 
-	/* Switch on current digit */
+	/* Change current digit */
 	switch (pos) {
 	case 3:
+		PORT(DIG_2) &= ~DIG_2_LINE;
 		PORT(DIG_3) |= DIG_3_LINE;
 		pos = 0;
 		break;
 	case 2:
+		PORT(DIG_1) &= ~DIG_1_LINE;
 		PORT(DIG_2) |= DIG_2_LINE;
 		pos = 3;
 		break;
 	case 1:
+		PORT(DIG_0) &= ~DIG_0_LINE;
 		PORT(DIG_1) |= DIG_1_LINE;
 		pos = 2;
 		break;
 	default:
+		PORT(DIG_3) &= ~DIG_3_LINE;
 		PORT(DIG_0) |= DIG_0_LINE;
 		pos = 1;
 		break;
 	}
 
-	static int16_t btnCnt = 0;		/* Buttons press duration value */
+	/* Set data on segments */
+	if (dig & BIT_A)
+		PORT(SEG_A) |= SEG_A_LINE;
+	if (dig & BIT_B)
+		PORT(SEG_B) |= SEG_B_LINE;
+	if (dig & BIT_C)
+		PORT(SEG_C) |= SEG_C_LINE;
+	if (dig & BIT_D)
+		PORT(SEG_D) |= SEG_D_LINE;
+	if (dig & BIT_E)
+		PORT(SEG_E) |= SEG_E_LINE;
+	if (dig & BIT_F)
+		PORT(SEG_F) |= SEG_F_LINE;
+	if (dig & BIT_G)
+		PORT(SEG_G) |= SEG_G_LINE;
+	if (dig & BIT_P)
+		PORT(SEG_P) |= SEG_P_LINE;
+
+	/* Handling buttons and encoder events */
+
+	static int16_t btnCnt = 0;
+
 	uint8_t encNow = ENC_0;
 	uint8_t btnNow = BTN_STATE_0;
 
@@ -142,6 +137,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 32 / 256 = 976 polls/sec */
 		btnNow |= BTN_3;
 	if (~PIN(BUTTON_4) & BUTTON_4_LINE)
 		btnNow |= BTN_4;
+
 
 	/* If encoder event has happened, inc/dec encoder counter */
 	switch (encNow) {
@@ -215,8 +211,10 @@ void segmNum(int16_t number, uint8_t dotPos)
 	uint8_t neg = 0;
 	uint8_t i;
 
+	uint8_t buf[DIGITS];
+
 	for (i = 0; i < DIGITS; i++)
-		ind[i] = 0;
+		buf[i] = 0;
 
 	if (number < 0) {
 		neg = 1;
@@ -226,14 +224,18 @@ void segmNum(int16_t number, uint8_t dotPos)
 	for (i = 0; i < DIGITS; i++) {
 		if (number == 0 && i > dotPos)
 			break;
-		ind[i] = num[number % 10];
+		buf[i] = num[number % 10];
 		if (i == (dotPos % DIGITS) && i)
-			ind[i] |= BIT_P;
+			buf[i] |= BIT_P;
 		number /= 10;
 	}
 
 	if (neg)
-		ind[i] = BIT_G;
+		buf[i] = BIT_G;
+
+	for (i = 0; i < DIGITS; i++) {
+		ind[i] = buf[i];
+	}
 
 	return;
 }
