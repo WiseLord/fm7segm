@@ -19,6 +19,7 @@
 #define BIT_G		(1<<6)
 #define BIT_P		(1<<7)
 
+#define CH_EMPTY	0
 #define CH_0		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F)
 #define CH_1		(BIT_B | BIT_C)
 #define CH_2		(BIT_A | BIT_B | BIT_D | BIT_E | BIT_G)
@@ -30,18 +31,31 @@
 #define CH_8		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F | BIT_G)
 #define CH_9		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_F | BIT_G)
 
+#define CH_G		(BIT_A | BIT_E | BIT_F)
+#define CH_C		(BIT_A | BIT_D | BIT_E | BIT_F)
+
 /* Display modes */
 enum {
-	MODE_STANDBY,
-	MODE_FM_RADIO,
-	MODE_VOLUME,
+	MODE_FM_FREQ,
 	MODE_TIME,
-	MODE_TIME_EDIT
+	MODE_FM_CHAN,
+	MODE_FMTUNE_FREQ,
+	MODE_FMTUNE_CHAN,
+	MODE_VOLUME,
+	MODE_TIME_EDIT_H,
+	MODE_TIME_EDIT_M,
+	MODE_STANDBY
 };
 
-#define DISPLAY_TIME_VOLUME		2000
-#define DISPLAY_TIME_FM_RADIO	2000
-#define DISPLAY_TIME_TIME		2000
+#define DISPLAY_TIME_VOLUME			2000
+#define DISPLAY_TIME_FM_FREQ		3000
+#define DISPLAY_TIME_FM_CHAN		1000
+#define DISPLAY_TIME_FMTUNE_FREQ	10000
+#define DISPLAY_TIME_FMTUNE_CHAN	1000
+#define DISPLAY_TIME_TIME			2000
+
+#define eepromDispMode		((uint16_t*)0x02)
+
 #define ENC_0			0b00
 #define ENC_A			0b01
 #define ENC_B			0b10
@@ -72,9 +86,15 @@ enum {
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
-void segmNum(int16_t number, uint8_t dot);
+void segmNum(int16_t number, uint8_t dot, uint8_t label);
+
 void segmTimeHM(void);
-void segmFmFreq(uint16_t freq);
+
+void segmFmFreq(void);
+void segmFmEditFreq(void);
+void segmFmNum(void);
+
+void segmVol(void);
 
 int8_t getEncoder(void);
 uint8_t getBtnCmd(void);

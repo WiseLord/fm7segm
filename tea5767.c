@@ -63,9 +63,11 @@ void tea5767DecFreq(void)
 }
 
 /* Find station number (1..64) in EEPROM */
-uint8_t tea5767StNum(uint16_t freq)
+uint8_t tea5767StNum(void)
 {
 	uint8_t i;
+
+	uint16_t freq = tea5767GetFreq();
 
 	for (i = 0; i < FM_COUNT; i++)
 		if (eeprom_read_word(eepromStations + i) == freq)

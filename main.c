@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/eeprom.h>
 #include <util/delay.h>
 
 #include "segm.h"
@@ -9,6 +10,8 @@
 #include "volume.h"
 
 #include "pins.h"
+
+static uint8_t defDispMode = MODE_TIME;
 
 /* Handle leaving standby mode */
 static void powerOn(void)
@@ -32,6 +35,7 @@ static void powerOff(void)
 
 	volumeSaveParams();
 	tea5767SaveParams();
+	eeprom_update_word(eepromDispMode, defDispMode);
 
 	setBrightness(BR_STBY);
 
@@ -58,8 +62,10 @@ int main(void)
 
 	tea5767LoadParams();
 	tea5767SetFreq(9950);
+	uint8_t editFM = 0;
 
 	volumeLoadParams();
+	defDispMode = eeprom_read_word(eepromDispMode);
 
 	int8_t encCnt = 0;
 	uint8_t cmd = CMD_EMPTY;
@@ -77,10 +83,12 @@ int main(void)
 		/* Handle command */
 		switch (cmd) {
 		case CMD_BTN_1:
+			editFM = 0;
 			switch (dispMode) {
 			case MODE_STANDBY:
 				powerOn();
-				dispMode = MODE_FM_RADIO;
+				dispMode = MODE_FM_CHAN;
+				setDisplayTime(DISPLAY_TIME_FM_CHAN);
 				break;
 			default:
 				powerOff();
@@ -88,22 +96,68 @@ int main(void)
 				break;
 			}
 			break;
-			dispMode = MODE_FM_RADIO;
-			setDisplayTime(DISPLAY_TIME_FM_RADIO);
-			break;
 		case CMD_BTN_2:
-			dispMode = MODE_TIME;
-			setDisplayTime(DISPLAY_TIME_TIME);
+			if (editFM) {
+				editFM = 0;
+				dispMode = defDispMode;
+				break;
+			}
+			switch (defDispMode) {
+			case MODE_TIME:
+				defDispMode = MODE_FM_FREQ;
+				dispMode = MODE_FM_FREQ;
+				setDisplayTime(DISPLAY_TIME_FM_FREQ);
+				break;
+			default:
+				defDispMode = MODE_TIME;
+				dispMode = MODE_TIME;
+				setDisplayTime(DISPLAY_TIME_TIME);
+				break;
+			}
 			break;
 		case CMD_BTN_3:
-			tea5767ScanStoredFreq(SEARCH_DOWN);
-			dispMode = MODE_FM_RADIO;
-			setDisplayTime(DISPLAY_TIME_FM_RADIO);
+			if (editFM) {
+				tea5767DecFreq();
+				dispMode = MODE_FMTUNE_FREQ;
+				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
+			} else {
+				tea5767ScanStoredFreq(SEARCH_DOWN);
+				dispMode = MODE_FM_CHAN;
+				setDisplayTime(DISPLAY_TIME_FM_CHAN);
+			}
 			break;
 		case CMD_BTN_4:
-			tea5767ScanStoredFreq(SEARCH_UP);
-			dispMode = MODE_FM_RADIO;
-			setDisplayTime(DISPLAY_TIME_FM_RADIO);
+			if (editFM) {
+				tea5767IncFreq();
+				dispMode = MODE_FMTUNE_FREQ;
+				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
+			} else {
+				tea5767ScanStoredFreq(SEARCH_UP);
+				dispMode = MODE_FM_CHAN;
+				setDisplayTime(DISPLAY_TIME_FM_CHAN);
+			}
+			break;
+		case CMD_BTN_3_LONG:
+			if (editFM) {
+				dispMode = MODE_FM_CHAN;
+				setDisplayTime(DISPLAY_TIME_FM_CHAN);
+				editFM = 0;
+			} else {
+				dispMode = MODE_FMTUNE_FREQ;
+				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
+				editFM = 1;
+			}
+			break;
+		case CMD_BTN_4_LONG:
+			if (editFM) {
+				tea5767StoreStation();
+				dispMode = MODE_FMTUNE_CHAN;
+				setDisplayTime(DISPLAY_TIME_FMTUNE_CHAN);
+			} else {
+				tea5767StoreStation();
+				dispMode = MODE_FM_CHAN;
+				setDisplayTime(DISPLAY_TIME_FM_CHAN);
+			}
 			break;
 		default:
 			break;
@@ -114,10 +168,8 @@ int main(void)
 			switch (dispMode) {
 			case MODE_STANDBY:
 				break;
-			case MODE_TIME:
-			case MODE_FM_RADIO:
-				dispMode = MODE_VOLUME;
 			default:
+				dispMode = MODE_VOLUME;
 				changeVolume(encCnt);
 				setDisplayTime(DISPLAY_TIME_VOLUME);
 				break;
@@ -129,8 +181,23 @@ int main(void)
 			switch (dispMode) {
 			case MODE_STANDBY:
 				break;
+			case MODE_FM_CHAN:
+				dispMode = MODE_FM_FREQ;
+				setDisplayTime(DISPLAY_TIME_FM_FREQ);
+				break;
+			case MODE_FMTUNE_CHAN:
+				dispMode = MODE_FMTUNE_FREQ;
+				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
+				break;
+			case MODE_FMTUNE_FREQ:
+				editFM = 0;
 			default:
-				dispMode = MODE_FM_RADIO;
+				if (editFM) {
+					dispMode = MODE_FMTUNE_FREQ;
+					setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
+				} else {
+					dispMode = defDispMode;
+				}
 				break;
 			}
 		}
@@ -140,15 +207,23 @@ int main(void)
 		case MODE_STANDBY:
 			segmTimeHM();
 			break;
-		case MODE_FM_RADIO:
-			segmFmFreq(tea5767GetFreq());
+		case MODE_FM_CHAN:
+		case MODE_FMTUNE_CHAN:
+			segmFmNum();
+			break;
+		case MODE_FM_FREQ:
+			segmFmFreq();
+			break;
+		case MODE_FMTUNE_FREQ:
+			segmFmEditFreq();
 			break;
 		case MODE_TIME:
-		case MODE_TIME_EDIT:
+		case MODE_TIME_EDIT_H:
+		case MODE_TIME_EDIT_M:
 			segmTimeHM();
 			break;
 		default:
-			segmNum(getVolume(), 0);
+			segmVol();
 			break;
 		}
 	}

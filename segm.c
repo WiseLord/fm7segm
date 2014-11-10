@@ -3,6 +3,8 @@
 #include "avr/interrupt.h"
 
 #include "ds1307.h"
+#include "tea5767.h"
+#include "volume.h"
 
 static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
@@ -15,6 +17,7 @@ static volatile uint8_t encPrev = ENC_0;
 static volatile uint8_t btnPrev = BTN_STATE_0;
 
 static volatile uint16_t displayTime;
+static volatile uint16_t blink;
 
 void segmInit(void)
 {
@@ -212,10 +215,16 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	if (displayTime > 0)
 		displayTime--;
 
+	/* Blink timer */
+	if (blink > 0)
+		blink--;
+	else
+		blink = 2000;
+
 	return;
 }
 
-void segmNum(int16_t number, uint8_t dotPos)
+void segmNum(int16_t number, uint8_t dotPos, uint8_t label)
 {
 	uint8_t neg = 0;
 	uint8_t i;
@@ -223,7 +232,7 @@ void segmNum(int16_t number, uint8_t dotPos)
 	uint8_t buf[DIGITS];
 
 	for (i = 0; i < DIGITS; i++)
-		buf[i] = 0;
+		buf[i] = CH_EMPTY;
 
 	if (number < 0) {
 		neg = 1;
@@ -242,9 +251,10 @@ void segmNum(int16_t number, uint8_t dotPos)
 	if (neg)
 		buf[i] = BIT_G;
 
-	for (i = 0; i < DIGITS; i++) {
-		ind[i] = buf[i];
-	}
+	ind[0] = buf[0];
+	ind[1] = buf[1];
+	ind[2] = buf[2];
+	ind[3] = buf[3] | label;
 
 	return;
 }
@@ -260,14 +270,50 @@ void segmTimeHM(void)
 	if (time[SEC] % 2)
 		timeDot = 6;
 
-	segmNum(100 * time[HOUR] + time[MIN], timeDot);
+	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY);
 
 	return;
 }
 
-void segmFmFreq(uint16_t freq)
+void segmFmFreq(void)
 {
-	segmNum(freq/10, 1);
+	segmNum(tea5767GetFreq()/10, 1, CH_EMPTY);
+
+	return;
+}
+
+void segmFmEditFreq(void)
+{
+	if (blink > 400)
+		segmNum(tea5767GetFreq()/10, 1, CH_EMPTY);
+	else {
+		ind[0] = CH_EMPTY;
+		ind[1] = CH_EMPTY;
+		ind[2] = CH_EMPTY;
+		ind[3] = CH_EMPTY;
+	}
+
+	return;
+}
+
+void segmFmNum(void)
+{
+	uint8_t num = tea5767StNum();
+
+	if (num) {
+		segmNum(num, 0, CH_C);
+	} else {
+		ind[0] = BIT_G;
+		ind[1] = BIT_G;
+		ind[2] = CH_EMPTY;
+		ind[3] = CH_C;
+	}
+	return;
+}
+
+void segmVol(void)
+{
+	segmNum(getVolume(), 0, CH_G);
 
 	return;
 }
