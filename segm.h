@@ -6,7 +6,6 @@
 #define BR_MIN		0
 #define BR_MAX		8
 #define BR_STBY		1
-#define BR_WORK		8
 
 #define DIGITS		4
 
@@ -33,6 +32,7 @@
 
 #define CH_G		(BIT_A | BIT_E | BIT_F)
 #define CH_C		(BIT_A | BIT_D | BIT_E | BIT_F)
+#define CH_E		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_G)
 
 /* Display modes */
 enum {
@@ -44,6 +44,7 @@ enum {
 	MODE_VOLUME,
 	MODE_TIME_EDIT_H,
 	MODE_TIME_EDIT_M,
+	MODE_BRIGHTNESS,
 	MODE_STANDBY
 };
 
@@ -54,8 +55,10 @@ enum {
 #define DISPLAY_TIME_FMTUNE_CHAN	1000
 #define DISPLAY_TIME_TIME			2000
 #define DISPLAY_TIME_EDITTIME		10000
+#define DISPLAY_TIME_BRIGHTNESS		2000
 
 #define eepromDispMode		((uint16_t*)0x02)
+#define eepromBrWork		((uint16_t*)0x08)
 
 #define ENC_0			0b00
 #define ENC_A			0b01

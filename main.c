@@ -12,6 +12,14 @@
 #include "pins.h"
 
 static uint8_t defDispMode = MODE_TIME;
+static int8_t brWork;
+
+static void segmBr(void)
+{
+	segmNum(brWork, 0, CH_E);
+
+	return;
+}
 
 /* Handle leaving standby mode */
 static void powerOn(void)
@@ -21,7 +29,7 @@ static void powerOn(void)
 
 	unmuteVolume();
 
-	setBrightness(BR_WORK);
+	setBrightness(brWork);
 
 	return;
 }
@@ -36,6 +44,7 @@ static void powerOff(void)
 	volumeSaveParams();
 	tea5767SaveParams();
 	eeprom_update_word(eepromDispMode, defDispMode);
+	eeprom_update_word(eepromBrWork, brWork);
 
 	setBrightness(BR_STBY);
 
@@ -66,6 +75,11 @@ int main(void)
 
 	volumeLoadParams();
 	defDispMode = eeprom_read_word(eepromDispMode);
+	brWork = eeprom_read_word(eepromBrWork);
+	if (brWork <= BR_MIN)
+		brWork = BR_STBY;
+	if (brWork >= BR_MAX)
+		brWork = BR_MAX;
 
 	int8_t encCnt = 0;
 	uint8_t cmd = CMD_EMPTY;
@@ -169,6 +183,11 @@ int main(void)
 				}
 			}
 			break;
+		case CMD_BTN_1_LONG:
+			editFM = 0;
+			dispMode = MODE_BRIGHTNESS;
+			setDisplayTime(DISPLAY_TIME_BRIGHTNESS);
+			break;
 		case CMD_BTN_2_LONG:
 			editFM = 0;
 			switch (dispMode) {
@@ -229,6 +248,15 @@ int main(void)
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 				break;
+			case MODE_BRIGHTNESS:
+				brWork += encCnt;
+				if (brWork > BR_MAX)
+					brWork = BR_MAX;
+				if (brWork < BR_STBY)
+					brWork = BR_STBY;
+				setBrightness(brWork);
+				setDisplayTime(DISPLAY_TIME_BRIGHTNESS);
+				break;
 			default:
 				dispMode = MODE_VOLUME;
 				changeVolume(encCnt);
@@ -286,6 +314,9 @@ int main(void)
 			break;
 		case MODE_TIME_EDIT_M:
 			segmTimeEditM();
+			break;
+		case MODE_BRIGHTNESS:
+			segmBr();
 			break;
 		default:
 			segmVol();

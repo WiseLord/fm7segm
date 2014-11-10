@@ -161,6 +161,7 @@ void changeTimeM(int diff)
 		time[MIN] = 0;
 	if (time[MIN] < 0)
 		time[MIN] = 59;
+	time[SEC] = 0;
 
 	writeTime();
 
