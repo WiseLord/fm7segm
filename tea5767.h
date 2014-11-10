@@ -59,8 +59,8 @@
 void tea5767SetFreq(uint16_t freq);
 uint16_t tea5767GetFreq();
 
-void tea5767IncFreq(void);
-void tea5767DecFreq(void);
+void tea5767IncFreq(uint8_t mult);
+void tea5767DecFreq(uint8_t mult);
 
 uint8_t tea5767StNum(void);
 void tea5767ScanStoredFreq(uint8_t direction);

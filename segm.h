@@ -53,6 +53,7 @@ enum {
 #define DISPLAY_TIME_FMTUNE_FREQ	10000
 #define DISPLAY_TIME_FMTUNE_CHAN	1000
 #define DISPLAY_TIME_TIME			2000
+#define DISPLAY_TIME_EDITTIME		10000
 
 #define eepromDispMode		((uint16_t*)0x02)
 
@@ -89,6 +90,8 @@ void segmBrightness(uint8_t value);
 void segmNum(int16_t number, uint8_t dot, uint8_t label);
 
 void segmTimeHM(void);
+void segmTimeEditH(void);
+void segmTimeEditM(void);
 
 void segmFmFreq(void);
 void segmFmEditFreq(void);

@@ -48,16 +48,16 @@ uint16_t tea5767GetFreq()
 	return freqFM;
 }
 
-void tea5767IncFreq(void)
+void tea5767IncFreq(uint8_t mult)
 {
-	tea5767SetFreq(freqFM + FM_STEP);
+	tea5767SetFreq(freqFM + FM_STEP * mult);
 
 	return;
 }
 
-void tea5767DecFreq(void)
+void tea5767DecFreq(uint8_t mult)
 {
-	tea5767SetFreq(freqFM - FM_STEP);
+	tea5767SetFreq(freqFM - FM_STEP * mult);
 
 	return;
 }

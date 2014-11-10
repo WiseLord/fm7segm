@@ -28,6 +28,9 @@ int8_t *readTime(void);
 void stopEditTime(void);
 uint8_t isETM(void);
 void editTime(void);
+
 void changeTime(int diff);
+void changeTimeH(int diff);
+void changeTimeM(int diff);
 
 #endif /* DS1307_H */

@@ -137,6 +137,36 @@ void editTime(void)
 	}
 }
 
+void changeTimeH(int diff)
+{
+	readTime();
+
+	time[HOUR] += diff;
+	if (time[HOUR] > 23)
+		time[HOUR] = 0;
+	if (time[HOUR] < 0)
+		time[HOUR] = 23;
+
+	writeTime();
+
+	return;
+}
+
+void changeTimeM(int diff)
+{
+	readTime();
+
+	time[MIN] += diff;
+	if (time[MIN] > 59)
+		time[MIN] = 0;
+	if (time[MIN] < 0)
+		time[MIN] = 59;
+
+	writeTime();
+
+	return;
+}
+
 void changeTime(int diff)
 {
 	readTime();

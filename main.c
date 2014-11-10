@@ -102,39 +102,84 @@ int main(void)
 				dispMode = defDispMode;
 				break;
 			}
-			switch (defDispMode) {
-			case MODE_TIME:
-				defDispMode = MODE_FM_FREQ;
-				dispMode = MODE_FM_FREQ;
-				setDisplayTime(DISPLAY_TIME_FM_FREQ);
-				break;
-			default:
-				defDispMode = MODE_TIME;
-				dispMode = MODE_TIME;
-				setDisplayTime(DISPLAY_TIME_TIME);
-				break;
+			if (dispMode == MODE_TIME_EDIT_H) {
+				dispMode = MODE_TIME_EDIT_M;
+				setDisplayTime(DISPLAY_TIME_EDITTIME);
+			} else if (dispMode == MODE_TIME_EDIT_M) {
+				dispMode = MODE_TIME_EDIT_H;
+				setDisplayTime(DISPLAY_TIME_EDITTIME);
+			} else {
+				switch (defDispMode) {
+				case MODE_TIME:
+					defDispMode = MODE_FM_FREQ;
+					dispMode = MODE_FM_FREQ;
+					setDisplayTime(DISPLAY_TIME_FM_FREQ);
+					break;
+				default:
+					defDispMode = MODE_TIME;
+					dispMode = MODE_TIME;
+					setDisplayTime(DISPLAY_TIME_TIME);
+					break;
+				}
 			}
 			break;
 		case CMD_BTN_3:
 			if (editFM) {
-				tea5767DecFreq();
+				tea5767DecFreq(10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
-				tea5767ScanStoredFreq(SEARCH_DOWN);
-				dispMode = MODE_FM_CHAN;
-				setDisplayTime(DISPLAY_TIME_FM_CHAN);
+				switch (dispMode) {
+				case MODE_TIME_EDIT_H:
+					changeTimeH(-1);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				case MODE_TIME_EDIT_M:
+					changeTimeM(-1);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				default:
+					tea5767ScanStoredFreq(SEARCH_DOWN);
+					dispMode = MODE_FM_CHAN;
+					setDisplayTime(DISPLAY_TIME_FM_CHAN);
+					break;
+				}
 			}
 			break;
 		case CMD_BTN_4:
 			if (editFM) {
-				tea5767IncFreq();
+				tea5767IncFreq(10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
-				tea5767ScanStoredFreq(SEARCH_UP);
-				dispMode = MODE_FM_CHAN;
-				setDisplayTime(DISPLAY_TIME_FM_CHAN);
+				switch (dispMode) {
+				case MODE_TIME_EDIT_H:
+					changeTimeH(+1);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				case MODE_TIME_EDIT_M:
+					changeTimeM(+1);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				default:
+					tea5767ScanStoredFreq(SEARCH_UP);
+					dispMode = MODE_FM_CHAN;
+					setDisplayTime(DISPLAY_TIME_FM_CHAN);
+					break;
+				}
+			}
+			break;
+		case CMD_BTN_2_LONG:
+			editFM = 0;
+			switch (dispMode) {
+			case MODE_TIME_EDIT_H:
+			case MODE_TIME_EDIT_M:
+				dispMode = defDispMode;
+				break;
+			default:
+				dispMode = MODE_TIME_EDIT_H;
+				setDisplayTime(DISPLAY_TIME_EDITTIME);
+				break;
 			}
 			break;
 		case CMD_BTN_3_LONG:
@@ -167,6 +212,22 @@ int main(void)
 		if (encCnt) {
 			switch (dispMode) {
 			case MODE_STANDBY:
+				break;
+			case MODE_TIME_EDIT_H:
+				changeTimeH(encCnt);
+				setDisplayTime(DISPLAY_TIME_EDITTIME);
+				break;
+			case MODE_TIME_EDIT_M:
+				changeTimeM(encCnt);
+				setDisplayTime(DISPLAY_TIME_EDITTIME);
+				break;
+			case MODE_FMTUNE_FREQ:
+				if (encCnt > 0)
+					tea5767IncFreq(1);
+				else
+					tea5767DecFreq(1);
+				dispMode = MODE_FMTUNE_FREQ;
+				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 				break;
 			default:
 				dispMode = MODE_VOLUME;
@@ -218,9 +279,13 @@ int main(void)
 			segmFmEditFreq();
 			break;
 		case MODE_TIME:
-		case MODE_TIME_EDIT_H:
-		case MODE_TIME_EDIT_M:
 			segmTimeHM();
+			break;
+		case MODE_TIME_EDIT_H:
+			segmTimeEditH();
+			break;
+		case MODE_TIME_EDIT_M:
+			segmTimeEditM();
 			break;
 		default:
 			segmVol();

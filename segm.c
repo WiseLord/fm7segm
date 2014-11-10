@@ -275,6 +275,47 @@ void segmTimeHM(void)
 	return;
 }
 
+void segmTimeEditH(void)
+{
+	int8_t *time;
+	uint8_t timeDot;
+
+	time = readTime();
+
+	timeDot = 8;
+	if (time[SEC] % 2)
+		timeDot = 6;
+
+	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY);
+	if (blink < 400) {
+		ind[2] = CH_EMPTY;
+		ind[3] = CH_EMPTY;
+	}
+
+	return;
+}
+
+void segmTimeEditM(void)
+{
+	int8_t *time;
+	uint8_t timeDot;
+
+	time = readTime();
+
+	timeDot = 8;
+	if (time[SEC] % 2)
+		timeDot = 6;
+
+
+	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY);
+	if (blink < 400) {
+		ind[0] = CH_EMPTY;
+		ind[1] = CH_EMPTY;
+	}
+
+	return;
+}
+
 void segmFmFreq(void)
 {
 	segmNum(tea5767GetFreq()/10, 1, CH_EMPTY);
