@@ -6,7 +6,7 @@
 #define VOL_MIN				0
 #define VOL_MAX				20
 
-#define eepromVolume		((uint16_t*)0x00)
+#define eepromVolume		((uint8_t*)0x00)
 
 void volumeInit(void);
 

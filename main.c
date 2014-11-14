@@ -43,8 +43,8 @@ static void powerOff(void)
 
 	volumeSaveParams();
 	tea5767SaveParams();
-	eeprom_update_word(eepromDispMode, defDispMode);
-	eeprom_update_word(eepromBrWork, brWork);
+	eeprom_update_byte(eepromDispMode, defDispMode);
+	eeprom_update_byte(eepromBrWork, brWork);
 
 	setBrightness(BR_STBY);
 
@@ -74,8 +74,8 @@ int main(void)
 	uint8_t editFM = 0;
 
 	volumeLoadParams();
-	defDispMode = eeprom_read_word(eepromDispMode);
-	brWork = eeprom_read_word(eepromBrWork);
+	defDispMode = eeprom_read_byte(eepromDispMode);
+	brWork = eeprom_read_byte(eepromBrWork);
 	if (brWork <= BR_MIN)
 		brWork = BR_STBY;
 	if (brWork >= BR_MAX)

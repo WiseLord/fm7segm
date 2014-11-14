@@ -61,14 +61,14 @@ void changeVolume(int8_t diff)
 
 void volumeLoadParams(void)
 {
-	vol = eeprom_read_word(eepromVolume);
+	vol = eeprom_read_byte(eepromVolume);
 
 	return;
 }
 
 void volumeSaveParams(void)
 {
-	eeprom_update_word(eepromVolume, vol);
+	eeprom_update_byte(eepromVolume, vol);
 
 	return;
 }
