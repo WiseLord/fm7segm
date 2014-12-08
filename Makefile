@@ -1,37 +1,53 @@
-TARG = fm7segm
+IND_TYPE = _CC
+USE_TRANS = _TR
+
+# Lowercase argument
+lc = $(shell echo $1 | tr A-Z a-z)
+
+TARG = fm7segm$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))
+
 MCU = atmega8
 F_CPU = 8000000
 
 # Source files
 SRCS = $(wildcard *.c)
 
-# Compiler options
-OPTIMIZE = -Os -mcall-prologues
-CFLAGS   = -g -Wall -Werror -lm $(OPTIMIZE) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
-LDFLAGS  = -g -Wall -Werror -mmcu=$(MCU)
+OPTIMIZE = -Os -mcall-prologues -fshort-enums
+DEBUG = -g -Wall -Werror
+CFLAGS = $(DEBUG) -lm $(OPTIMIZE) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
+LDFLAGS = $(DEBUG) -mmcu=$(MCU)
 
-# AVR toolchain and flasher
-CC       = avr-gcc
-OBJCOPY  = avr-objcopy
-AVRDUDE  = avrdude
+CC = avr-gcc
+OBJCOPY = avr-objcopy
 
-OBJS = $(SRCS:.c=.o)
+AVRDUDE = avrdude
+AD_MCU = -p $(MCU)
+#AD_PROG = -c stk500v2
+#AD_PORT = -P avrdoper
+
+AD_CMDLINE = $(AD_MCU) $(AD_PROG) $(AD_PORT) -V
+
+OBJDIR = obj
+OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.c=.o))
+ELF = $(OBJDIR)/$(TARG).elf
 
 all: $(TARG)
 
 $(TARG): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@.elf  $(OBJS) -lm
-	$(OBJCOPY) -O ihex -R .eeprom -R .nwram  $@.elf $@.hex
-	sh ./size.sh $@.elf
+	$(CC) $(LDFLAGS) -o $(ELF) $(OBJS) -lm
+	mkdir -p flash
+	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) flash/$@.hex
+	./size.sh $(ELF)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+obj/%.o: %.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -c -o $@ $<
 
 clean:
-	rm -f $(TARG).elf $(TARG).hex $(OBJS)
+	rm -rf $(OBJDIR)
 
 flash: $(TARG)
-	$(AVRDUDE) -p $(MCU) -U flash:w:$(TARG).hex:i
+	$(AVRDUDE) $(AD_CMDLINE) -U flash:w:flash/$(TARG).hex:i
 
 eeprom:
 	$(AVRDUDE) -p $(MCU) -U eeprom:w:$(TARG).eep:r

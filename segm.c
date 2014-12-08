@@ -76,6 +76,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		brPwm = 0;
 
 	/* Switch off segments */
+#if defined(_CC)
 	PORT(SEG_A) &= ~SEG_A_LINE;
 	PORT(SEG_B) &= ~SEG_B_LINE;
 	PORT(SEG_C) &= ~SEG_C_LINE;
@@ -84,33 +85,64 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	PORT(SEG_F) &= ~SEG_F_LINE;
 	PORT(SEG_G) &= ~SEG_G_LINE;
 	PORT(SEG_P) &= ~SEG_P_LINE;
+#else
+	PORT(SEG_A) |= ~SEG_A_LINE;
+	PORT(SEG_B) |= ~SEG_B_LINE;
+	PORT(SEG_C) |= ~SEG_C_LINE;
+	PORT(SEG_D) |= ~SEG_D_LINE;
+	PORT(SEG_E) |= ~SEG_E_LINE;
+	PORT(SEG_F) |= ~SEG_F_LINE;
+	PORT(SEG_G) |= ~SEG_G_LINE;
+	PORT(SEG_P) |= ~SEG_P_LINE;
+#endif
 
 	if (brPwm > 0 && brPwm <= brightness) {
 		/* Change current digit */
 		switch (pos) {
 		case 3:
+#if defined(INV_DIG)
+			PORT(DIG_2) |= DIG_2_LINE;
+			PORT(DIG_3) &= ~DIG_3_LINE;
+#else
 			PORT(DIG_2) &= ~DIG_2_LINE;
 			PORT(DIG_3) |= DIG_3_LINE;
+#endif
 			pos = 0;
 			break;
 		case 2:
+#if defined(INV_DIG)
+			PORT(DIG_1) |= DIG_1_LINE;
+			PORT(DIG_2) &= ~DIG_2_LINE;
+#else
 			PORT(DIG_1) &= ~DIG_1_LINE;
 			PORT(DIG_2) |= DIG_2_LINE;
+#endif
 			pos = 3;
 			break;
 		case 1:
+#if defined(INV_DIG)
+			PORT(DIG_0) |= DIG_0_LINE;
+			PORT(DIG_1) &= ~DIG_1_LINE;
+#else
 			PORT(DIG_0) &= ~DIG_0_LINE;
 			PORT(DIG_1) |= DIG_1_LINE;
+#endif
 			pos = 2;
 			break;
 		default:
+#if defined(INV_DIG)
+			PORT(DIG_3) |= DIG_3_LINE;
+			PORT(DIG_0) &= ~DIG_0_LINE;
+#else
 			PORT(DIG_3) &= ~DIG_3_LINE;
 			PORT(DIG_0) |= DIG_0_LINE;
+#endif
 			pos = 1;
 			break;
 		}
 
 		/* Set data on segments */
+#if defined(_CC)
 		if (dig & BIT_A)
 			PORT(SEG_A) |= SEG_A_LINE;
 		if (dig & BIT_B)
@@ -127,6 +159,24 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 			PORT(SEG_G) |= SEG_G_LINE;
 		if (dig & BIT_P)
 			PORT(SEG_P) |= SEG_P_LINE;
+#else
+		if (dig & BIT_A)
+			PORT(SEG_A) &= ~SEG_A_LINE;
+		if (dig & BIT_B)
+			PORT(SEG_B) &= ~SEG_B_LINE;
+		if (dig & BIT_C)
+			PORT(SEG_C) &= ~SEG_C_LINE;
+		if (dig & BIT_D)
+			PORT(SEG_D) &= ~SEG_D_LINE;
+		if (dig & BIT_E)
+			PORT(SEG_E) &= ~SEG_E_LINE;
+		if (dig & BIT_F)
+			PORT(SEG_F) &= ~SEG_F_LINE;
+		if (dig & BIT_G)
+			PORT(SEG_G) &= ~SEG_G_LINE;
+		if (dig & BIT_P)
+			PORT(SEG_P) &= ~SEG_P_LINE;
+#endif
 	}
 
 	/* Handling buttons and encoder events */

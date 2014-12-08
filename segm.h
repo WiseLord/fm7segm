@@ -3,6 +3,15 @@
 
 #include "pins.h"
 
+/* _CC: Use indicators with common cathode by default */
+#if !defined(_CC) && !defined(_CA)
+#define _CC
+#endif
+
+#if (defined (_CC) && !defined(_TR)) || (!defined(_CC) && defined(_TR))
+#define INV_DIG
+#endif
+
 #define BR_MIN		0
 #define BR_MAX		8
 #define BR_STBY		1
