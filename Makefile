@@ -50,7 +50,7 @@ flash: $(TARG)
 	$(AVRDUDE) $(AD_CMDLINE) -U flash:w:flash/$(TARG).hex:i
 
 eeprom:
-	$(AVRDUDE) -p $(MCU) -U eeprom:w:$(TARG).eep:r
+	$(AVRDUDE) -p $(MCU) -U eeprom:w:fm7segm.eep:r
 
 fuse:
 	$(AVRDUDE) -p $(MCU) -U lfuse:w:0x24:m -U hfuse:w:0xc1:m
