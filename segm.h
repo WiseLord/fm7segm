@@ -53,6 +53,7 @@ enum {
 	MODE_VOLUME,
 	MODE_TIME_EDIT_H,
 	MODE_TIME_EDIT_M,
+	MODE_TEMP,
 	MODE_BRIGHTNESS,
 	MODE_STANDBY
 };
@@ -63,6 +64,7 @@ enum {
 #define DISPLAY_TIME_FMTUNE_FREQ	10000
 #define DISPLAY_TIME_FMTUNE_CHAN	1000
 #define DISPLAY_TIME_TIME			2000
+#define DISPLAY_TIME_TEMP			2000
 #define DISPLAY_TIME_EDITTIME		10000
 #define DISPLAY_TIME_BRIGHTNESS		2000
 
@@ -101,15 +103,16 @@ void segmInit(void);
 void segmBrightness(uint8_t value);
 void segmNum(int16_t number, uint8_t dot, uint8_t label);
 
-void segmTimeHM(void);
-void segmTimeEditH(void);
-void segmTimeEditM(void);
+void segmTimeHM(int8_t *time);
+void segmTimeEditH(int8_t *time);
+void segmTimeEditM(int8_t *time);
 
 void segmFmFreq(void);
 void segmFmEditFreq(void);
 void segmFmNum(void);
 
 void segmVol(void);
+void segmTemp(void);
 
 int8_t getEncoder(void);
 uint8_t getBtnCmd(void);
@@ -118,5 +121,8 @@ void setDisplayTime(uint16_t value);
 uint16_t getDisplayTime(void);
 
 void setBrightness(uint8_t value);
+
+uint16_t getTempTimer(void);
+void setTempTimer(uint16_t val);
 
 #endif // SEGM_H

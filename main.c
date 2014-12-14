@@ -8,8 +8,7 @@
 #include "ds1307.h"
 #include "tea5767.h"
 #include "volume.h"
-
-#include "pins.h"
+#include "ds18x20.h"
 
 static uint8_t defDispMode = MODE_TIME;
 static int8_t brWork;
@@ -53,10 +52,13 @@ static void powerOff(void)
 
 void hwInit(void)
 {
+	_delay_ms(100);
+
 	segmInit();							/* Indicator */
 	I2CInit();							/* I2C bus */
 	ds1307Init();						/* RTC */
 	volumeInit();
+	ds18x20Init();
 
 	sei();
 
@@ -83,10 +85,13 @@ int main(void)
 
 	int8_t encCnt = 0;
 	uint8_t cmd = CMD_EMPTY;
+	int8_t *time;
 
 	while (1) {
 		encCnt = getEncoder();
 		cmd = getBtnCmd();
+		ds18x20Process();
+		time = readTime();
 
 		/* Don't handle commands in standby mode except STBY */
 		if (dispMode == MODE_STANDBY) {
@@ -122,7 +127,7 @@ int main(void)
 			} else if (dispMode == MODE_TIME_EDIT_M) {
 				dispMode = MODE_TIME_EDIT_H;
 				setDisplayTime(DISPLAY_TIME_EDITTIME);
-			} else {
+			} else if (dispMode == MODE_TEMP) {
 				switch (defDispMode) {
 				case MODE_TIME:
 					defDispMode = MODE_FM_FREQ;
@@ -134,6 +139,14 @@ int main(void)
 					dispMode = MODE_TIME;
 					setDisplayTime(DISPLAY_TIME_TIME);
 					break;
+				}
+			} else {
+				if (dispMode == MODE_TIME) {
+					dispMode = MODE_TEMP;
+					setDisplayTime(DISPLAY_TIME_TEMP);
+				} else {
+					dispMode = MODE_TIME;
+					setDisplayTime(DISPLAY_TIME_TIME);
 				}
 			}
 			break;
@@ -294,7 +307,14 @@ int main(void)
 		/* Show things */
 		switch (dispMode) {
 		case MODE_STANDBY:
-			segmTimeHM();
+			if (time[SEC] % 20 >= 18) { /* Every 20 sec for 2 sec*/
+				segmTemp();
+			} else {
+				segmTimeHM(time);
+			}
+			break;
+		case MODE_TEMP:
+			segmTemp();
 			break;
 		case MODE_FM_CHAN:
 		case MODE_FMTUNE_CHAN:
@@ -307,13 +327,13 @@ int main(void)
 			segmFmEditFreq();
 			break;
 		case MODE_TIME:
-			segmTimeHM();
+			segmTimeHM(time);
 			break;
 		case MODE_TIME_EDIT_H:
-			segmTimeEditH();
+			segmTimeEditH(time);
 			break;
 		case MODE_TIME_EDIT_M:
-			segmTimeEditM();
+			segmTimeEditM(time);
 			break;
 		case MODE_BRIGHTNESS:
 			segmBr();

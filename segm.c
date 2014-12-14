@@ -5,6 +5,7 @@
 #include "ds1307.h"
 #include "tea5767.h"
 #include "volume.h"
+#include "ds18x20.h"
 
 static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
@@ -18,6 +19,8 @@ static volatile uint8_t btnPrev = BTN_STATE_0;
 
 static volatile uint16_t displayTime;
 static volatile uint16_t blink;
+
+static volatile uint16_t tempTimer;
 
 void segmInit(void)
 {
@@ -271,6 +274,9 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	else
 		blink = 2000;
 
+	if (tempTimer > 0)
+		tempTimer--;
+
 	return;
 }
 
@@ -309,12 +315,9 @@ void segmNum(int16_t number, uint8_t dotPos, uint8_t label)
 	return;
 }
 
-void segmTimeHM(void)
+void segmTimeHM(int8_t *time)
 {
-	int8_t *time;
 	uint8_t timeDot;
-
-	time = readTime();
 
 	timeDot = 8;
 	if (time[SEC] % 2)
@@ -325,12 +328,9 @@ void segmTimeHM(void)
 	return;
 }
 
-void segmTimeEditH(void)
+void segmTimeEditH(int8_t *time)
 {
-	int8_t *time;
 	uint8_t timeDot;
-
-	time = readTime();
 
 	timeDot = 8;
 	if (time[SEC] % 2)
@@ -345,12 +345,9 @@ void segmTimeEditH(void)
 	return;
 }
 
-void segmTimeEditM(void)
+void segmTimeEditM(int8_t *time)
 {
-	int8_t *time;
 	uint8_t timeDot;
-
-	time = readTime();
 
 	timeDot = 8;
 	if (time[SEC] % 2)
@@ -409,6 +406,13 @@ void segmVol(void)
 	return;
 }
 
+void segmTemp(void)
+{
+	segmNum(ds18x20GetTemp(), 1, CH_EMPTY);
+
+	return;
+}
+
 int8_t getEncoder(void)
 {
 	int8_t ret = encCnt;
@@ -442,4 +446,14 @@ void setBrightness(uint8_t value)
 	brightness = value;
 
 	return;
+}
+
+uint16_t getTempTimer(void)
+{
+	return tempTimer >> 2;
+}
+
+void setTempTimer(uint16_t val)
+{
+	tempTimer = val << 2;
 }
