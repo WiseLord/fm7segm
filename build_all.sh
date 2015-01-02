@@ -1,11 +1,14 @@
 #!/bin/sh
 
-make clean
-make IND_TYPE=_CC USE_TRANS=_TR
-make clean
-make IND_TYPE=_CC USE_TRANS=_NO
-make clean
-make IND_TYPE=_CA USE_TRANS=_TR
-make clean
-make IND_TYPE=_CA USE_TRANS=_NO
+for IND_TYPE in _CA _CC
+do
+	for USE_TRANS in _NO _TR
+	do
+		for TUNER in RDA5807 TEA5767
+		do
+			make clean
+			make IND_TYPE=${IND_TYPE} USE_TRANS=${USE_TRANS} TUNER=${TUNER}
+		done
+	done
+done
 make clean

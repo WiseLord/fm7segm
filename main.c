@@ -6,7 +6,7 @@
 #include "segm.h"
 #include "i2c.h"
 #include "ds1307.h"
-#include "tea5767.h"
+#include "tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
 
@@ -24,7 +24,7 @@ static void segmBr(void)
 static void powerOn(void)
 {
 	_delay_ms(50);
-	tea5767LoadParams();
+	loadTunerParams();
 
 	unmuteVolume();
 
@@ -41,7 +41,7 @@ static void powerOff(void)
 	stopEditTime();
 
 	volumeSaveParams();
-	tea5767SaveParams();
+	saveTunerParams();
 	eeprom_update_byte(eepromDispMode, defDispMode);
 	eeprom_update_byte(eepromBrWork, brWork);
 
@@ -71,8 +71,8 @@ int main(void)
 
 	uint8_t dispMode = MODE_STANDBY;
 
-	tea5767LoadParams();
-	tea5767SetFreq(9950);
+	loadTunerParams();
+	tunerSetFreq(9950);
 	uint8_t editFM = 0;
 
 	volumeLoadParams();
@@ -152,7 +152,7 @@ int main(void)
 			break;
 		case CMD_BTN_3:
 			if (editFM) {
-				tea5767DecFreq(10);
+				tunerDecFreq(10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
@@ -166,7 +166,7 @@ int main(void)
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
-					tea5767ScanStoredFreq(SEARCH_DOWN);
+					scanStoredFreq(SEARCH_DOWN);
 					dispMode = MODE_FM_CHAN;
 					setDisplayTime(DISPLAY_TIME_FM_CHAN);
 					break;
@@ -175,7 +175,7 @@ int main(void)
 			break;
 		case CMD_BTN_4:
 			if (editFM) {
-				tea5767IncFreq(10);
+				tunerIncFreq(10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
@@ -189,7 +189,7 @@ int main(void)
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
-					tea5767ScanStoredFreq(SEARCH_UP);
+					scanStoredFreq(SEARCH_UP);
 					dispMode = MODE_FM_CHAN;
 					setDisplayTime(DISPLAY_TIME_FM_CHAN);
 					break;
@@ -227,11 +227,11 @@ int main(void)
 			break;
 		case CMD_BTN_4_LONG:
 			if (editFM) {
-				tea5767StoreStation();
+				storeStation();
 				dispMode = MODE_FMTUNE_CHAN;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_CHAN);
 			} else {
-				tea5767StoreStation();
+				storeStation();
 				dispMode = MODE_FM_CHAN;
 				setDisplayTime(DISPLAY_TIME_FM_CHAN);
 			}
@@ -255,9 +255,9 @@ int main(void)
 				break;
 			case MODE_FMTUNE_FREQ:
 				if (encCnt > 0)
-					tea5767IncFreq(1);
+					tunerIncFreq(1);
 				else
-					tea5767DecFreq(1);
+					tunerDecFreq(1);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 				break;

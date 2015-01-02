@@ -3,7 +3,7 @@
 #include "avr/interrupt.h"
 
 #include "ds1307.h"
-#include "tea5767.h"
+#include "tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
 
@@ -365,7 +365,7 @@ void segmTimeEditM(int8_t *time)
 
 void segmFmFreq(void)
 {
-	segmNum(tea5767GetFreq()/10, 1, CH_EMPTY);
+	segmNum(tunerGetFreq()/10, 1, CH_EMPTY);
 
 	return;
 }
@@ -373,7 +373,7 @@ void segmFmFreq(void)
 void segmFmEditFreq(void)
 {
 	if (blink > 400)
-		segmNum(tea5767GetFreq()/10, 1, CH_EMPTY);
+		segmNum(tunerGetFreq()/10, 1, CH_EMPTY);
 	else {
 		ind[0] = CH_EMPTY;
 		ind[1] = CH_EMPTY;
@@ -386,7 +386,7 @@ void segmFmEditFreq(void)
 
 void segmFmNum(void)
 {
-	uint8_t num = tea5767StNum();
+	uint8_t num = stationNum();
 
 	if (num) {
 		segmNum(num, 0, CH_C);
