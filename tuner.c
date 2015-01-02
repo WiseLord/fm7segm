@@ -11,7 +11,9 @@ static uint8_t stepFM;
 void tunerInit()
 {
 #if defined(TEA5767)
-	tea5767Init();
+	uint8_t ctrl;
+	ctrl = eeprom_read_byte(eepromFMCtrl);
+	tea5767Init(ctrl);
 #elif defined(RDA5807)
 	rda5807Init();
 #endif
@@ -214,8 +216,8 @@ void storeStation(void)
 void loadTunerParams(void)
 {
 	freqFM = eeprom_read_word(eepromFMFreq);
-//	monoFM = eeprom_read_byte(eepromFMMono);
-//	stepFM = eeprom_read_byte(eepromFMStep);
+	monoFM = eeprom_read_byte(eepromFMMono);
+	stepFM = eeprom_read_byte(eepromFMStep);
 
 	tunerSetFreq(freqFM);
 
@@ -225,7 +227,7 @@ void loadTunerParams(void)
 void saveTunerParams(void)
 {
 	eeprom_update_word(eepromFMFreq, freqFM);
-//	eeprom_update_byte(eepromFMMono, monoFM);
+	eeprom_update_byte(eepromFMMono, monoFM);
 
 #if defined(TUX032)
 	tux032GoStby();

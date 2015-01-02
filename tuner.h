@@ -4,12 +4,14 @@
 #include <inttypes.h>
 
 /* Tuner type selection */
-#if !defined(TEA5767) && !defined(RDA5807)
+#if !defined(TEA5767) && !defined(TUX032) && !defined(RDA5807)
 #define TEA5767
 #endif
 
 #if defined(TEA5767)
 #include "tuner/tea5767.h"
+#elif defined(TUX032)
+#include "tuner/tux032.h"
 #elif defined(RDA5807)
 #include "tuner/rda5807.h"
 #endif
@@ -29,6 +31,9 @@
 
 #define eepromFMFreq		((uint16_t*)0x04)
 #define eepromStations		((uint16_t*)0x10)
+#define eepromFMMono		((void*)0x0C)
+#define eepromFMStep		((void*)0x0D)
+#define eepromFMCtrl		((void*)0x0E)
 
 void tunerInit();
 

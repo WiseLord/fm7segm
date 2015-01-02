@@ -1,7 +1,6 @@
 #include "tea5767.h"
 
 #include "../i2c.h"
-#include <avr/eeprom.h>
 
 static uint8_t buf[5];
 
@@ -15,9 +14,9 @@ static uint8_t ctrl = 0x71;
 #define TEA5767_PLLREF_CTRL		(1<<1)
 #define TEA5767_XTAL_CTRL		(1<<0)
 
-void tea5767Init(void)
+void tea5767Init(uint8_t tea5767Ctrl)
 {
-//	ctrl = eeprom_read_byte(eepromFMCtrl);
+	ctrl = tea5767Ctrl;
 
 	return;
 }

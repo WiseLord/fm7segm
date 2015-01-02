@@ -1,7 +1,7 @@
 IND_TYPE = _CC
 USE_TRANS = _TR
 
-TUNER = RDA5807
+TUNER = TEA5767
 
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
@@ -13,6 +13,8 @@ F_CPU = 8000000
 
 ifeq ($(TUNER), TEA5767)
   TUNER_SRC = tuner/tea5767.c
+else ifeq ($(TUNER), TUX032)
+  TUNER_SRC = tuner/tux032.c
 else ifeq ($(TUNER), RDA5807)
   TUNER_SRC = tuner/rda5807.c
 endif
