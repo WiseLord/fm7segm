@@ -17,6 +17,11 @@ void tunerInit()
 
 void tunerSetFreq(uint16_t freq)
 {
+	if (freq > RDA5807_FREQ_MAX)
+		freq = RDA5807_FREQ_MAX;
+	if (freq < RDA5807_FREQ_MIN)
+		freq = RDA5807_FREQ_MIN;
+
 	rda5807SetFreq(freq);
 
 	freqFM = freq;

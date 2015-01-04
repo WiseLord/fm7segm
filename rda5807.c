@@ -2,8 +2,6 @@
 
 #include "i2c.h"
 
-#define CHAN_SPACING 5
-
 static uint8_t wrBuf[5];
 static uint8_t rdBuf[5];
 
@@ -39,7 +37,7 @@ void rda5807Init(uint8_t mono)
 		wrBuf[0] |= RDA5807_MONO;
 	wrBuf[1] = RDA5807_CLK_MODE_32768 | RDA5807_NEW_METHOD | RDA5807_ENABLE;
 	wrBuf[2] = 0;
-	wrBuf[3] = (RDA5807_TUNE | RDA5807_BAND_US_EUROPE | RDA5807_SPACE_50);
+	wrBuf[3] = (RDA5807_TUNE | RDA5807_BAND | RDA5807_SPACE);
 	wrBuf[4] = RDA5807_SOFTMUTE_EN;
 
 	rda5807WriteI2C();
@@ -49,12 +47,7 @@ void rda5807Init(uint8_t mono)
 
 void rda5807SetFreq(uint16_t freq)
 {
-	if (freq > RDA5807_FREQ_MAX)
-		freq = RDA5807_FREQ_MAX;
-	if (freq < RDA5807_FREQ_MIN)
-		freq = RDA5807_FREQ_MIN;
-
-	uint16_t chan = (freq - RDA5807_FREQ_MIN) / CHAN_SPACING;
+	uint16_t chan = (freq - RDA5807_FREQ_MIN) / RDA5807_CHAN_SPACING;
 
 	wrBuf[2] = chan >> 2;					/* 8 MSB */
 
