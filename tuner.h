@@ -2,19 +2,7 @@
 #define TUNER_H
 
 #include <inttypes.h>
-
-/* Tuner type selection */
-#if !defined(TEA5767) && !defined(TUX032) && !defined(RDA5807)
-#define TEA5767
-#endif
-
-#if defined(TEA5767)
-#include "tuner/tea5767.h"
-#elif defined(TUX032)
-#include "tuner/tux032.h"
-#elif defined(RDA5807)
-#include "tuner/rda5807.h"
-#endif
+#include "rda5807.h"
 
 #define FM_COUNT			64
 

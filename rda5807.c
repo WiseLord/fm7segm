@@ -1,6 +1,6 @@
 #include "rda5807.h"
 
-#include "../i2c.h"
+#include "i2c.h"
 
 #define CHAN_SPACING 5
 

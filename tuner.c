@@ -10,13 +10,7 @@ static uint8_t stepFM;
 
 void tunerInit()
 {
-#if defined(TEA5767)
-	uint8_t ctrl;
-	ctrl = eeprom_read_byte(eepromFMCtrl);
-	tea5767Init(ctrl);
-#elif defined(RDA5807)
 	rda5807Init();
-#endif
 
 	return;
 }
@@ -28,15 +22,8 @@ void tunerSetFreq(uint16_t freq)
 	if (freq < FM_FREQ_MIN)
 		freq = FM_FREQ_MAX;
 
-#if defined(TEA5767)
-	tea5767SetFreq(freq, monoFM);
-#elif defined(TUX032)
-	tux032SetFreq(freq);
-#elif defined(LM7001)
-	lm7001SetFreq(freq);
-#elif defined(RDA5807)
 	rda5807SetFreq(freq, monoFM);
-#endif
+
 	freqFM = freq;
 
 	return;
@@ -63,57 +50,31 @@ void tunerDecFreq(uint8_t mult)
 
 void tunerReadStatus()
 {
-#if defined(TEA5767)
-	tea5767ReadStatus(bufFM);
-#elif defined(TUX032)
-	tux032ReadStatus(bufFM);
-#elif defined(RDA5807)
 	rda5807ReadStatus(bufFM);
-#endif
 
 	return;
 }
 
 void tunerSwitchMono()
 {
-#if defined(TEA5767) || defined(RDA5807)
 	monoFM = !monoFM;
 	tunerSetFreq(tunerGetFreq());
-#endif
+
 	return;
 }
 
 uint8_t tunerStereo()
 {
-#if defined(TEA5767)
-	return TEA5767_BUF_STEREO(bufFM) && !monoFM;
-#elif defined(TUX032)
-	return !TUX032_BUF_STEREO(bufFM);
-#elif defined(LM7001)
-	return 1;
-#elif defined(RDA5807)
 	return RDA5807_BUF_STEREO(bufFM) && !monoFM;
-#endif
 }
 
 uint8_t tunerLevel()
 {
-#if defined(TEA5767)
-	return (bufFM[3] & TEA5767_LEV_MASK) >> 4;
-#elif defined(TUX032)
-	if (tunerStereo())
-		return 13;
-	else
-		return 3;
-#elif defined(LM7001)
-	return 13;
-#elif defined(RDA5807)
 	uint8_t rawLevel = (bufFM[2] & RDA5807_RSSI) >> 1;
 	if (rawLevel < 24)
 		return 0;
 	else
 		return (rawLevel - 24) >> 1;
-#endif
 }
 
 void tunerChangeFreq(int8_t mult)
