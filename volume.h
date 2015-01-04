@@ -3,8 +3,8 @@
 
 #include "pins.h"
 
-#define VOL_MIN				0
-#define VOL_MAX				20
+#define VOL_MIN				RDA5807_VOL_MIN
+#define VOL_MAX				RDA5807_VOL_MAX
 
 #define eepromVolume		((uint8_t*)0x00)
 

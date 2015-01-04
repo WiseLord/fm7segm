@@ -27,7 +27,7 @@ static void powerOn(void)
 	_delay_ms(50);
 	loadTunerParams();
 
-	unmuteVolume();
+	rda5807UnmuteVolume();
 
 	setBrightness(brWork);
 
@@ -37,7 +37,7 @@ static void powerOn(void)
 /* Handle entering standby mode */
 static void powerOff(void)
 {
-	muteVolume();
+	rda5807MuteVolume();
 
 	stopEditTime();
 
@@ -58,8 +58,10 @@ void hwInit(void)
 	segmInit();							/* Indicator */
 	I2CInit();							/* I2C bus */
 	ds1307Init();						/* RTC */
-	volumeInit();
 	tunerInit();
+
+	DDR(VOLUME) |= VOLUME_LINE;
+	PORT(VOLUME) |= VOLUME_LINE;
 
 	dsOnBus = ds18x20Init();			/* Try to init temperature sensor */
 
@@ -284,7 +286,7 @@ int main(void)
 				break;
 			default:
 				dispMode = MODE_VOLUME;
-				changeVolume(encCnt);
+				setVolume(getVolume() + encCnt);
 				setDisplayTime(DISPLAY_TIME_VOLUME);
 				break;
 			}

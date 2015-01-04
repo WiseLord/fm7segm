@@ -121,7 +121,7 @@
  */
 
 #define RDA5807_SPACE				RDA5807_SPACE_50
-#define RDA5807_BAND				RDA5807_BAND_WORLDWIDE
+#define RDA5807_BAND				RDA5807_BAND_US_EUROPE
 
 #if RDA5807_SPACE == RDA5807_SPACE_50
 #define RDA5807_CHAN_SPACING		5
@@ -137,20 +137,21 @@
 #elif RDA5807_BAND == RDA5807_BAND_WORLDWIDE
 #define RDA5807_FREQ_MIN			7600
 #define RDA5807_FREQ_MAX			10800
-#elif RDA5807_BAND == RDA5807_BAND_EASTEUROPE
-#define RDA5807_FREQ_MIN			6500
-#define RDA5807_FREQ_MAX			7600
-#elif RDA5807_BAND == RDA5807_BAND_JAPAN
-#define RDA5807_FREQ_MIN			7600
-#define RDA5807_FREQ_MAX			9700
 #endif
 
+#define RDA5807_VOL_MIN				0
+#define RDA5807_VOL_MAX				16
 
 #define RDA5807_BUF_READY(buf)	(buf[3] & RDA5807_FM_READY)
 #define RDA5807_BUF_STEREO(buf)	(buf[0] & RDA5807_ST)
 
 void rda5807Init(uint8_t mono);
 void rda5807SetFreq(uint16_t freq);
+
+void rda5807SetVolume(int8_t value);
+void rda5807MuteVolume(void);
+void rda5807UnmuteVolume(void);
+
 uint8_t *rda5807ReadStatus(void);
 
 #endif /* RDA5807M_H */
