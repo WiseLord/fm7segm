@@ -12,6 +12,7 @@
 
 static uint8_t defDispMode = MODE_TIME;
 static int8_t brWork;
+static uint8_t dsOnBus = 0;
 
 static void segmBr(void)
 {
@@ -58,7 +59,8 @@ void hwInit(void)
 	I2CInit();							/* I2C bus */
 	ds1307Init();						/* RTC */
 	volumeInit();
-	ds18x20Init();
+
+	dsOnBus = ds18x20Init();			/* Try to init temperature sensor */
 
 	sei();
 
@@ -90,8 +92,9 @@ int main(void)
 	while (1) {
 		encCnt = getEncoder();
 		cmd = getBtnCmd();
-		ds18x20Process();
 		time = readTime();
+		if (dsOnBus)
+			ds18x20Process();
 
 		/* Don't handle commands in standby mode except STBY */
 		if (dispMode == MODE_STANDBY) {
@@ -142,10 +145,18 @@ int main(void)
 				}
 			} else {
 				if (dispMode == MODE_TIME) {
-					dispMode = MODE_TEMP;
-					setDisplayTime(DISPLAY_TIME_TEMP);
+					if (dsOnBus) {
+						dispMode = MODE_TEMP;
+						setDisplayTime(DISPLAY_TIME_TEMP);
+					} else {
+						defDispMode = MODE_FM_FREQ;
+						dispMode = MODE_FM_FREQ;
+						setDisplayTime(DISPLAY_TIME_FM_FREQ);
+					}
 				} else {
 					dispMode = MODE_TIME;
+					if (!dsOnBus)
+						defDispMode = MODE_TIME;
 					setDisplayTime(DISPLAY_TIME_TIME);
 				}
 			}
@@ -307,7 +318,7 @@ int main(void)
 		/* Show things */
 		switch (dispMode) {
 		case MODE_STANDBY:
-			if (time[SEC] % 20 >= 18) { /* Every 20 sec for 2 sec*/
+			if (dsOnBus && time[SEC] % 20 >= 18) { /* Every 20 sec for 2 sec*/
 				segmTemp();
 			} else {
 				segmTimeHM(time);

@@ -21,7 +21,7 @@
 
 #define DS18X20_MAX_DEV				1
 
-void ds18x20Init(void);
+uint8_t ds18x20Init(void);
 void ds18x20Process(void);
 int16_t ds18x20GetTemp(void);
 

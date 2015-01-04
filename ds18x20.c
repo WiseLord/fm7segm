@@ -65,7 +65,7 @@ static int16_t ds18x20GetRawTemp(void)
 	return ret;
 }
 
-void ds18x20Init(void)
+uint8_t ds18x20Init(void)
 {
 	PORT(TEMP_SENSOR) &= ~TEMP_SENSOR_LINE;				/* Set active 0 */
 
@@ -73,11 +73,12 @@ void ds18x20Init(void)
 	if (ds18x20IsOnBus()) {
 		ds18x20SendByte(DS18X20_CMD_SKIP_ROM);
 		ds18x20SendByte(DS18X20_CMD_CONVERT);
+		setTempTimer(1000);
+
+		return 1;
 	}
 
-	setTempTimer(1000);
-
-	return;
+	return 0;
 }
 
 void ds18x20Process(void)
