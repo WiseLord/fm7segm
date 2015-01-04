@@ -59,6 +59,7 @@ void hwInit(void)
 	I2CInit();							/* I2C bus */
 	ds1307Init();						/* RTC */
 	volumeInit();
+	tunerInit();
 
 	dsOnBus = ds18x20Init();			/* Try to init temperature sensor */
 

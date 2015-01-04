@@ -2,7 +2,7 @@
 
 #include <avr/eeprom.h>
 
-uint8_t bufFM[5];
+uint8_t *bufFM;
 
 static uint16_t freqFM;
 static uint8_t monoFM;
@@ -10,19 +10,14 @@ static uint8_t stepFM;
 
 void tunerInit()
 {
-	rda5807Init();
+	rda5807Init(monoFM);
 
 	return;
 }
 
 void tunerSetFreq(uint16_t freq)
 {
-	if (freq > FM_FREQ_MAX)
-		freq = FM_FREQ_MIN;
-	if (freq < FM_FREQ_MIN)
-		freq = FM_FREQ_MAX;
-
-	rda5807SetFreq(freq, monoFM);
+	rda5807SetFreq(freq);
 
 	freqFM = freq;
 
@@ -50,7 +45,7 @@ void tunerDecFreq(uint8_t mult)
 
 void tunerReadStatus()
 {
-	rda5807ReadStatus(bufFM);
+	bufFM = rda5807ReadStatus();
 
 	return;
 }

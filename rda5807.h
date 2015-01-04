@@ -5,6 +5,9 @@
 
 #define RDA5807M_ADDR				0b00100000
 
+#define RDA5807_FREQ_MIN			8700
+#define RDA5807_FREQ_MAX			10800
+
 /* Write mode register values */
 
 /* 0 register (02H) */
@@ -123,8 +126,8 @@
 #define RDA5807_BUF_READY(buf)	(buf[3] & RDA5807_FM_READY)
 #define RDA5807_BUF_STEREO(buf)	(buf[0] & RDA5807_ST)
 
-void rda5807Init(void);
-void rda5807SetFreq(uint16_t freq, uint8_t mono);
-void rda5807ReadStatus(uint8_t *buf);
+void rda5807Init(uint8_t mono);
+void rda5807SetFreq(uint16_t freq);
+uint8_t *rda5807ReadStatus(void);
 
 #endif /* RDA5807M_H */
