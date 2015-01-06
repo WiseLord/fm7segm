@@ -60,9 +60,6 @@ void hwInit(void)
 	ds1307Init();						/* RTC */
 	tunerInit();
 
-	DDR(VOLUME) |= VOLUME_LINE;
-	PORT(VOLUME) |= VOLUME_LINE;
-
 	dsOnBus = ds18x20Init();			/* Try to init temperature sensor */
 
 	sei();
