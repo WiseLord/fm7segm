@@ -408,7 +408,7 @@ void segmVol(void)
 
 void segmTemp(void)
 {
-	segmNum(ds18x20GetTemp(), 1, CH_EMPTY);
+	segmNum(ds18x20GetTemp(0), 1, CH_EMPTY);
 
 	return;
 }

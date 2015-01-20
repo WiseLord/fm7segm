@@ -51,8 +51,8 @@
 #define BUTTON_4			D
 #define BUTTON_4_LINE		(1<<2)
 
-/* Temperature definitions */
-#define TEMP_SENSOR			B
-#define TEMP_SENSOR_LINE	(1<<5)
+/* 1-wire definitions */
+#define ONE_WIRE			B
+#define ONE_WIRE_LINE		(1<<5)
 
 #endif /* PINS_H */

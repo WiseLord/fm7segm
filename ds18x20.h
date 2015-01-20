@@ -1,7 +1,10 @@
 #ifndef DS18X20_H
 #define DS18X20_H
 
-#include <avr/io.h>
+#include <inttypes.h>
+#include "pins.h"
+
+/*#define DS18X20_PARASITE_POWER */
 
 /* DS18X20 commands */
 #define DS18X20_CMD_SEARCH_ROM		0xF0
@@ -19,10 +22,16 @@
 #define DS18S20_FAMILY_CODE			0x10
 #define DS18B20_FAMILY_CODE			0x28
 
-#define DS18X20_MAX_DEV				1
+#define DS18X20_MAX_DEV				2
 
-uint8_t ds18x20Init(void);
-void ds18x20Process(void);
-int16_t ds18x20GetTemp(void);
+typedef struct {
+	uint8_t id[8];		/* 64 bit ds18x20 device ID. */
+	uint8_t sp[9];		/* Scratchpad memory */
+} ds18x20Dev;
+
+void ds18x20SearchDevices(void);
+uint8_t ds18x20Process(void);
+int16_t ds18x20GetTemp(uint8_t num);
+ds18x20Dev ds18x20GetDev(uint8_t num);
 
 #endif /* DS18X20_H */

@@ -55,14 +55,16 @@ void hwInit(void)
 {
 	_delay_ms(100);
 
+	sei();
+	ds18x20SearchDevices();
+
 	segmInit();							/* Indicator */
 	I2CInit();							/* I2C bus */
 	ds1307Init();						/* RTC */
 	tunerInit();
 
-	dsOnBus = ds18x20Init();			/* Try to init temperature sensor */
+	dsOnBus = ds18x20Process();			/* Try to find temperature sensor */
 
-	sei();
 
 	return;
 }
