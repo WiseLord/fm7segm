@@ -212,13 +212,13 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		if (encPrev == ENC_A)
 			encCnt--;
 		break;
-/*	case ENC_0:
+	case ENC_0:
 		if (encPrev == ENC_A)
 			encCnt++;
 		if (encPrev == ENC_B)
 			encCnt--;
 		break;
-*/	}
+	}
 	encPrev = encNow; /* Save current encoder state */
 
 	/* If button event has happened, place it to command buffer */

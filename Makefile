@@ -1,5 +1,5 @@
 IND_TYPE = _CC
-USE_TRANS = _NO
+USE_TRANS = _TR
 
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
