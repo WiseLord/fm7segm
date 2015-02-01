@@ -13,7 +13,7 @@
 #endif
 
 #define BR_MIN		1
-#define BR_MAX		8
+#define BR_MAX		12
 
 #define DIGITS		4
 

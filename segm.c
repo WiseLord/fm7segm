@@ -11,7 +11,7 @@
 static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
-static volatile uint8_t brightness = 1;
+static uint8_t pos = 0;
 
 static uint8_t useEncoder = 0;
 
@@ -59,6 +59,7 @@ void segmInit(void)
 	PORT(ENCODER_B) |= ENCODER_B_LINE;
 
 	TIMSK |= (1<<TOIE2);							/* Enable timer overflow interrupt */
+	TIMSK |= (1<<OCIE2);							/* Enable timer compare interrupt */
 	TCCR2 |= (0<<CS22) | (1<<CS21) | (0<<CS20);		/* Set timer prescaller to 8 */
 	TCNT2 = 0;
 
@@ -70,19 +71,8 @@ void segmInit(void)
 	return;
 }
 
-ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
+ISR (TIMER2_COMP_vect)
 {
-	static uint8_t pos = 0;
-
-	uint8_t dig = 0;
-
-	dig = ind[pos];
-
-	static uint8_t brPwm;
-	brPwm++;
-	if (brPwm > BR_MAX)
-		brPwm = 0;
-
 	/* Switch off segments */
 #if defined(_CC)
 	PORT(SEG_A) &= ~SEG_A_LINE;
@@ -103,89 +93,95 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	PORT(SEG_G) |= ~SEG_G_LINE;
 	PORT(SEG_P) |= ~SEG_P_LINE;
 #endif
+#if defined(INV_DIG)
+	PORT(DIG_0) |= DIG_0_LINE;
+	PORT(DIG_1) |= DIG_1_LINE;
+	PORT(DIG_2) |= DIG_2_LINE;
+	PORT(DIG_3) |= DIG_3_LINE;
+#else
+	PORT(DIG_0) &= ~DIG_0_LINE;
+	PORT(DIG_1) &= ~DIG_1_LINE;
+	PORT(DIG_2) &= ~DIG_2_LINE;
+	PORT(DIG_3) &= ~DIG_3_LINE;
+#endif
 
-	if (brPwm > 0 && brPwm <= brightness) {
-		/* Change current digit */
-		switch (pos) {
-		case 3:
-#if defined(INV_DIG)
-			PORT(DIG_2) |= DIG_2_LINE;
-			PORT(DIG_3) &= ~DIG_3_LINE;
-#else
-			PORT(DIG_2) &= ~DIG_2_LINE;
-			PORT(DIG_3) |= DIG_3_LINE;
-#endif
-			pos = 0;
-			break;
-		case 2:
-#if defined(INV_DIG)
-			PORT(DIG_1) |= DIG_1_LINE;
-			PORT(DIG_2) &= ~DIG_2_LINE;
-#else
-			PORT(DIG_1) &= ~DIG_1_LINE;
-			PORT(DIG_2) |= DIG_2_LINE;
-#endif
-			pos = 3;
-			break;
-		case 1:
-#if defined(INV_DIG)
-			PORT(DIG_0) |= DIG_0_LINE;
-			PORT(DIG_1) &= ~DIG_1_LINE;
-#else
-			PORT(DIG_0) &= ~DIG_0_LINE;
-			PORT(DIG_1) |= DIG_1_LINE;
-#endif
-			pos = 2;
-			break;
-		default:
-#if defined(INV_DIG)
-			PORT(DIG_3) |= DIG_3_LINE;
-			PORT(DIG_0) &= ~DIG_0_LINE;
-#else
-			PORT(DIG_3) &= ~DIG_3_LINE;
-			PORT(DIG_0) |= DIG_0_LINE;
-#endif
-			pos = 1;
-			break;
-		}
+}
 
-		/* Set data on segments */
-#if defined(_CC)
-		if (dig & BIT_A)
-			PORT(SEG_A) |= SEG_A_LINE;
-		if (dig & BIT_B)
-			PORT(SEG_B) |= SEG_B_LINE;
-		if (dig & BIT_C)
-			PORT(SEG_C) |= SEG_C_LINE;
-		if (dig & BIT_D)
-			PORT(SEG_D) |= SEG_D_LINE;
-		if (dig & BIT_E)
-			PORT(SEG_E) |= SEG_E_LINE;
-		if (dig & BIT_F)
-			PORT(SEG_F) |= SEG_F_LINE;
-		if (dig & BIT_G)
-			PORT(SEG_G) |= SEG_G_LINE;
-		if (dig & BIT_P)
-			PORT(SEG_P) |= SEG_P_LINE;
-#else
-		if (dig & BIT_A)
-			PORT(SEG_A) &= ~SEG_A_LINE;
-		if (dig & BIT_B)
-			PORT(SEG_B) &= ~SEG_B_LINE;
-		if (dig & BIT_C)
-			PORT(SEG_C) &= ~SEG_C_LINE;
-		if (dig & BIT_D)
-			PORT(SEG_D) &= ~SEG_D_LINE;
-		if (dig & BIT_E)
-			PORT(SEG_E) &= ~SEG_E_LINE;
-		if (dig & BIT_F)
-			PORT(SEG_F) &= ~SEG_F_LINE;
-		if (dig & BIT_G)
-			PORT(SEG_G) &= ~SEG_G_LINE;
-		if (dig & BIT_P)
-			PORT(SEG_P) &= ~SEG_P_LINE;
-#endif
+ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
+{
+	uint8_t dig = ind[pos];
+
+	/* Change current digit */
+#if defined(INV_DIG)
+	switch (pos) {
+	case 3:
+		PORT(DIG_3) &= ~DIG_3_LINE;
+		break;
+	case 2:
+		PORT(DIG_2) &= ~DIG_2_LINE;
+		break;
+	case 1:
+		PORT(DIG_1) &= ~DIG_1_LINE;
+		break;
+	default:
+		PORT(DIG_0) &= ~DIG_0_LINE;
+		break;
 	}
+#else
+	switch (pos) {
+	case 3:
+		PORT(DIG_3) |= DIG_3_LINE;
+		break;
+	case 2:
+		PORT(DIG_2) |= DIG_2_LINE;
+		break;
+	case 1:
+		PORT(DIG_1) |= DIG_1_LINE;
+		break;
+	default:
+		PORT(DIG_0) |= DIG_0_LINE;
+		break;
+	}
+#endif
+	if (++pos > 3)
+		pos = 0;
+
+	/* Set data on segments */
+#if defined(_CC)
+	if (dig & BIT_A)
+		PORT(SEG_A) |= SEG_A_LINE;
+	if (dig & BIT_B)
+		PORT(SEG_B) |= SEG_B_LINE;
+	if (dig & BIT_C)
+		PORT(SEG_C) |= SEG_C_LINE;
+	if (dig & BIT_D)
+		PORT(SEG_D) |= SEG_D_LINE;
+	if (dig & BIT_E)
+		PORT(SEG_E) |= SEG_E_LINE;
+	if (dig & BIT_F)
+		PORT(SEG_F) |= SEG_F_LINE;
+	if (dig & BIT_G)
+		PORT(SEG_G) |= SEG_G_LINE;
+	if (dig & BIT_P)
+		PORT(SEG_P) |= SEG_P_LINE;
+#else
+	if (dig & BIT_A)
+		PORT(SEG_A) &= ~SEG_A_LINE;
+	if (dig & BIT_B)
+		PORT(SEG_B) &= ~SEG_B_LINE;
+	if (dig & BIT_C)
+		PORT(SEG_C) &= ~SEG_C_LINE;
+	if (dig & BIT_D)
+		PORT(SEG_D) &= ~SEG_D_LINE;
+	if (dig & BIT_E)
+		PORT(SEG_E) &= ~SEG_E_LINE;
+	if (dig & BIT_F)
+		PORT(SEG_F) &= ~SEG_F_LINE;
+	if (dig & BIT_G)
+		PORT(SEG_G) &= ~SEG_G_LINE;
+	if (dig & BIT_P)
+		PORT(SEG_P) &= ~SEG_P_LINE;
+#endif
 
 	/* Handling buttons and encoder events */
 
@@ -473,7 +469,7 @@ void setBrightness(uint8_t value)
 	if (value > BR_MAX)
 		value = BR_MAX;
 
-	brightness = value;
+	OCR2 = value * 21;
 
 	return;
 }
