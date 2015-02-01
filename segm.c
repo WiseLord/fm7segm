@@ -1,6 +1,7 @@
 #include "segm.h"
 
-#include "avr/interrupt.h"
+#include <avr/interrupt.h>
+#include <avr/eeprom.h>
 
 #include "ds1307.h"
 #include "tuner.h"
@@ -11,6 +12,8 @@ static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
 static volatile uint8_t brightness = 1;
+
+static uint8_t useEncoder = 0;
 
 static volatile int8_t encCnt;
 static volatile uint8_t cmdBuf;
@@ -61,6 +64,8 @@ void segmInit(void)
 
 	encCnt = 0;
 	cmdBuf = CMD_EMPTY;
+
+	useEncoder = eeprom_read_byte(eepromEncoder);
 
 	return;
 }
@@ -189,10 +194,12 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	uint8_t encNow = ENC_0;
 	uint8_t btnNow = BTN_STATE_0;
 
-	if (~PIN(ENCODER_A) & ENCODER_A_LINE)
-		encNow |= ENC_A;
-	if (~PIN(ENCODER_B) & ENCODER_B_LINE)
-		encNow |= ENC_B;
+	if (useEncoder) {
+		if (~PIN(ENCODER_A) & ENCODER_A_LINE)
+			encNow |= ENC_A;
+		if (~PIN(ENCODER_B) & ENCODER_B_LINE)
+			encNow |= ENC_B;
+	}
 
 	if (~PIN(BUTTON_1) & BUTTON_1_LINE)
 		btnNow |= BTN_1;
@@ -202,24 +209,31 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		btnNow |= BTN_3;
 	if (~PIN(BUTTON_4) & BUTTON_4_LINE)
 		btnNow |= BTN_4;
-
+	if (!useEncoder) {
+		if (~PIN(ENCODER_A) & ENCODER_A_LINE)
+			btnNow |= ENC_A;
+		if (~PIN(ENCODER_B) & ENCODER_B_LINE)
+			btnNow |= ENC_B;
+	}
 
 	/* If encoder event has happened, inc/dec encoder counter */
-	switch (encNow) {
-	case ENC_AB:
-		if (encPrev == ENC_B)
-			encCnt++;
-		if (encPrev == ENC_A)
-			encCnt--;
-		break;
-	case ENC_0:
-		if (encPrev == ENC_A)
-			encCnt++;
-		if (encPrev == ENC_B)
-			encCnt--;
-		break;
+	if (useEncoder) {
+		switch (encNow) {
+		case ENC_AB:
+			if (encPrev == ENC_B)
+				encCnt++;
+			if (encPrev == ENC_A)
+				encCnt--;
+			break;
+		case ENC_0:
+			if (encPrev == ENC_A)
+				encCnt++;
+			if (encPrev == ENC_B)
+				encCnt--;
+			break;
+		}
+		encPrev = encNow; /* Save current encoder state */
 	}
-	encPrev = encNow; /* Save current encoder state */
 
 	/* If button event has happened, place it to command buffer */
 	if (btnNow) {
@@ -240,6 +254,16 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 					cmdBuf = CMD_BTN_4_LONG;
 					break;
 				}
+			} else if (btnCnt == LONG_PRESS + AUTOREPEAT) {
+				switch (btnPrev) {
+				case ENC_A:
+					encCnt++;
+					break;
+				case ENC_B:
+					encCnt--;
+					break;
+				}
+				btnCnt = LONG_PRESS + 1;
 			}
 		} else {
 			btnPrev = btnNow;
@@ -258,6 +282,12 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 				break;
 			case BTN_4:
 				cmdBuf = CMD_BTN_4;
+				break;
+			case ENC_A:
+				encCnt++;
+				break;
+			case ENC_B:
+				encCnt--;
 				break;
 			}
 		}

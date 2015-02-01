@@ -37,7 +37,7 @@
 
 #define FM_STEP				10
 
-#define eepromFMFreq		((uint16_t*)0x04)
+#define eepromFMFreq		((uint16_t*)0x08)
 #define eepromStations		((uint16_t*)0x10)
 #define eepromFMMono		((void*)0x0C)
 #define eepromFMStep		((void*)0x0D)

@@ -69,18 +69,19 @@ enum {
 #define DISPLAY_TIME_BRIGHTNESS		2000
 
 #define eepromDispMode		((uint8_t*)0x02)
-#define eepromBrWork		((uint8_t*)0x08)
+#define eepromBrWork		((uint8_t*)0x04)
+#define eepromEncoder		((uint8_t*)0x06)
 
-#define ENC_0			0b00
-#define ENC_A			0b01
-#define ENC_B			0b10
-#define ENC_AB			0b11
+#define ENC_0			0b000000
+#define ENC_A			0b000001
+#define ENC_B			0b000010
+#define ENC_AB			0b000011
 
-#define BTN_STATE_0		0b0000
-#define BTN_1			0b0001
-#define BTN_2			0b0010
-#define BTN_3			0b0100
-#define BTN_4			0b1000
+#define BTN_STATE_0		0b000000
+#define BTN_1			0b000100
+#define BTN_2			0b001000
+#define BTN_3			0b010000
+#define BTN_4			0b100000
 
 enum {
 	CMD_BTN_1,
@@ -98,6 +99,7 @@ enum {
 // Handling long press actions */
 #define SHORT_PRESS		400
 #define LONG_PRESS		2400
+#define AUTOREPEAT		800
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
