@@ -322,7 +322,7 @@ int main(void)
 		/* Show things */
 		switch (dispMode) {
 		case MODE_STANDBY:
-			if (dsOnBus && time[SEC] % 20 >= 18) { /* Every 20 sec for 2 sec*/
+			if (dsOnBus && (time[SEC] % 15 >= 13)) { /* Every 20 sec for 2 sec*/
 				segmTemp();
 			} else {
 				segmTimeHM(time);
@@ -342,7 +342,11 @@ int main(void)
 			segmFmEditFreq();
 			break;
 		case MODE_TIME:
-			segmTimeHM(time);
+			if (dsOnBus && (time[SEC] % 15 >= 13) && !getDisplayTime()) {
+				segmTemp();
+			} else {
+				segmTimeHM(time);
+			}
 			break;
 		case MODE_TIME_EDIT_H:
 			segmTimeEditH(time);
