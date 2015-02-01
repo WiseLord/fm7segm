@@ -55,4 +55,8 @@
 #define ONE_WIRE			B
 #define ONE_WIRE_LINE		(1<<5)
 
+/* Volume PWM line */
+#define VOLUME				D
+#define VOLUME_LINE			(1<<0)
+
 #endif /* PINS_H */

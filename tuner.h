@@ -2,7 +2,19 @@
 #define TUNER_H
 
 #include <inttypes.h>
-#include "rda5807.h"
+/* Tuner type selection */
+
+#if !defined(RDA5807) && !defined(TEA5767) && !defined(TUX032)
+#define RDA5807
+#endif
+
+#if defined(RDA5807)
+#include "tuner/rda5807.h"
+#elif defined(TEA5767)
+#include "tuner/tea5767.h"
+#elif defined(TUX032)
+#include "tuner/tux032.h"
+#endif
 
 #define FM_COUNT			64
 
@@ -11,6 +23,17 @@
 
 #define FM_MONO				1
 #define FM_STEREO			0
+
+#if defined(RDA5807)
+#define FM_FREQ_MIN			RDA5807_FREQ_MIN
+#define FM_FREQ_MAX			RDA5807_FREQ_MAX
+#elif defined(TEA5767)
+#define FM_FREQ_MIN			TEA5767_FREQ_MIN
+#define FM_FREQ_MAX			TEA5767_FREQ_MAX
+#elif defined(TUX032)
+#define FM_FREQ_MIN			TUX032_FREQ_MIN
+#define FM_FREQ_MAX			TUX032_FREQ_MAX
+#endif
 
 #define FM_STEP				10
 

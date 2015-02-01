@@ -145,8 +145,8 @@
 #define RDA5807_BUF_READY(buf)	(buf[3] & RDA5807_FM_READY)
 #define RDA5807_BUF_STEREO(buf)	(buf[0] & RDA5807_ST)
 
-void rda5807Init(uint8_t mono);
-void rda5807SetFreq(uint16_t freq);
+void rda5807Init(void);
+void rda5807SetFreq(uint16_t freq, uint8_t mono);
 
 void rda5807SetVolume(int8_t value);
 void rda5807MuteVolume(void);

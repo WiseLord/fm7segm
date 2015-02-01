@@ -1,6 +1,6 @@
 #include "rda5807.h"
 
-#include "i2c.h"
+#include "../i2c.h"
 
 static uint8_t wrBuf[8];
 static uint8_t rdBuf[5];
@@ -17,24 +17,9 @@ static void rda5807WriteI2C(void)
 	return;
 }
 
-static void rda5807ReadI2C(void)
-{
-	uint8_t i;
-
-	I2CStart(RDA5807M_ADDR | I2C_READ);
-	for (i = 0; i < sizeof(rdBuf) - 1; i++)
-		I2CReadByte(&rdBuf[i], I2C_ACK);
-	I2CReadByte(&rdBuf[sizeof(rdBuf) - 1], I2C_NOACK);
-	I2CStop();
-
-	return;
-}
-
-void rda5807Init(uint8_t mono)
+void rda5807Init(void)
 {
 	wrBuf[0] = RDA5807_DHIZ;
-	if (mono)
-		wrBuf[0] |= RDA5807_MONO;
 	wrBuf[1] = RDA5807_CLK_MODE_32768 | RDA5807_NEW_METHOD | RDA5807_ENABLE;
 	wrBuf[2] = 0;
 	wrBuf[3] = RDA5807_BAND | RDA5807_SPACE;
@@ -48,9 +33,14 @@ void rda5807Init(uint8_t mono)
 	return;
 }
 
-void rda5807SetFreq(uint16_t freq)
+void rda5807SetFreq(uint16_t freq, uint8_t mono)
 {
 	uint16_t chan = (freq - RDA5807_FREQ_MIN) / RDA5807_CHAN_SPACING;
+
+	if (mono)
+		wrBuf[0] |= RDA5807_MONO;
+	else
+		wrBuf[0] &= ~RDA5807_MONO;
 
 	wrBuf[2] = chan >> 2;								/* 8 MSB */
 
@@ -58,7 +48,6 @@ void rda5807SetFreq(uint16_t freq)
 	wrBuf[3] |= RDA5807_TUNE | ((chan & 0x03) << 6);	/* 2 LSB */
 
 	rda5807WriteI2C();
-	wrBuf[0] |= RDA5807_DMUTE;
 
 	return;
 }
@@ -100,7 +89,13 @@ void rda5807UnmuteVolume(void)
 
 uint8_t *rda5807ReadStatus(void)
 {
-	rda5807ReadI2C();
+	uint8_t i;
+
+	I2CStart(RDA5807M_ADDR | I2C_READ);
+	for (i = 0; i < sizeof(rdBuf) - 1; i++)
+		I2CReadByte(&rdBuf[i], I2C_ACK);
+	I2CReadByte(&rdBuf[sizeof(rdBuf) - 1], I2C_NOACK);
+	I2CStop();
 
 	return rdBuf;
 }
