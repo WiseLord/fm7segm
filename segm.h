@@ -12,9 +12,8 @@
 #define INV_DIG
 #endif
 
-#define BR_MIN		0
+#define BR_MIN		1
 #define BR_MAX		8
-#define BR_STBY		1
 
 #define DIGITS		4
 
@@ -70,6 +69,7 @@ enum {
 
 #define eepromDispMode		((uint8_t*)0x02)
 #define eepromBrWork		((uint8_t*)0x04)
+#define eepromBrStby		((uint8_t*)0x05)
 #define eepromEncoder		((uint8_t*)0x06)
 
 #define ENC_0			0b000000

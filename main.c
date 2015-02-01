@@ -11,7 +11,7 @@
 #include "ds18x20.h"
 
 static uint8_t defDispMode = MODE_TIME;
-static int8_t brWork;
+static int8_t brWork, brStby;
 static uint8_t dsOnBus = 0;
 
 static void segmBr(void)
@@ -46,7 +46,7 @@ static void powerOff(void)
 	eeprom_update_byte(eepromDispMode, defDispMode);
 	eeprom_update_byte(eepromBrWork, brWork);
 
-	setBrightness(BR_STBY);
+	setBrightness(brStby);
 
 	return;
 }
@@ -83,8 +83,9 @@ int main(void)
 	volumeLoadParams();
 	defDispMode = eeprom_read_byte(eepromDispMode);
 	brWork = eeprom_read_byte(eepromBrWork);
+	brStby = eeprom_read_byte(eepromBrStby);
 	if (brWork <= BR_MIN)
-		brWork = BR_STBY;
+		brWork = BR_MIN;
 	if (brWork >= BR_MAX)
 		brWork = BR_MAX;
 
@@ -279,8 +280,8 @@ int main(void)
 				brWork += encCnt;
 				if (brWork > BR_MAX)
 					brWork = BR_MAX;
-				if (brWork < BR_STBY)
-					brWork = BR_STBY;
+				if (brWork < BR_MIN)
+					brWork = BR_MIN;
 				setBrightness(brWork);
 				setDisplayTime(DISPLAY_TIME_BRIGHTNESS);
 				break;
