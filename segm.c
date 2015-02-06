@@ -84,14 +84,14 @@ ISR (TIMER2_COMP_vect)
 	PORT(SEG_G) &= ~SEG_G_LINE;
 	PORT(SEG_P) &= ~SEG_P_LINE;
 #else
-	PORT(SEG_A) |= ~SEG_A_LINE;
-	PORT(SEG_B) |= ~SEG_B_LINE;
-	PORT(SEG_C) |= ~SEG_C_LINE;
-	PORT(SEG_D) |= ~SEG_D_LINE;
-	PORT(SEG_E) |= ~SEG_E_LINE;
-	PORT(SEG_F) |= ~SEG_F_LINE;
-	PORT(SEG_G) |= ~SEG_G_LINE;
-	PORT(SEG_P) |= ~SEG_P_LINE;
+	PORT(SEG_A) |= SEG_A_LINE;
+	PORT(SEG_B) |= SEG_B_LINE;
+	PORT(SEG_C) |= SEG_C_LINE;
+	PORT(SEG_D) |= SEG_D_LINE;
+	PORT(SEG_E) |= SEG_E_LINE;
+	PORT(SEG_F) |= SEG_F_LINE;
+	PORT(SEG_G) |= SEG_G_LINE;
+	PORT(SEG_P) |= SEG_P_LINE;
 #endif
 #if defined(INV_DIG)
 	PORT(DIG_0) |= DIG_0_LINE;
@@ -221,13 +221,13 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 			if (encPrev == ENC_A)
 				encCnt--;
 			break;
-		case ENC_0:
+/*		case ENC_0:
 			if (encPrev == ENC_A)
 				encCnt++;
 			if (encPrev == ENC_B)
 				encCnt--;
 			break;
-		}
+*/		}
 		encPrev = encNow; /* Save current encoder state */
 	}
 
