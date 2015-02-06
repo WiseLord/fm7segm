@@ -30,10 +30,10 @@
 #define DIG_0_LINE			(1<<0)
 #define DIG_1				C
 #define DIG_1_LINE			(1<<1)
-#define DIG_3				C
-#define DIG_3_LINE			(1<<2)
 #define DIG_2				C
 #define DIG_2_LINE			(1<<3)
+#define DIG_3				C
+#define DIG_3_LINE			(1<<2)
 
 /* Encoder definitions */
 #define ENCODER_A			B
