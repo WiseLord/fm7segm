@@ -15,9 +15,8 @@ static const int8_t volPwms[] = {
 
 void volumeInit(void)
 {
-#if !defined(RDA5807)
 	DDR(VOLUME) |= VOLUME_LINE;
-
+#if !defined(RDA5807)
 	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 */
 #endif
 
@@ -67,6 +66,7 @@ void muteVolume(void)
 {
 #if defined(RDA5807)
 	rda5807MuteVolume();
+	PORT(VOLUME) |= VOLUME_LINE;					/* Pull amplifier input to ground */
 #else
 	TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
 	PORT(VOLUME) &= ~VOLUME_LINE;
@@ -78,6 +78,7 @@ void muteVolume(void)
 void unmuteVolume(void)
 {
 #if defined(RDA5807)
+	PORT(VOLUME) &= ~VOLUME_LINE;					/* Release amplifier input */
 	rda5807UnmuteVolume();
 #else
 	TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
