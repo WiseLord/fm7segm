@@ -16,9 +16,9 @@ static const int8_t volPwms[] = {
 void volumeInit(void)
 {
 	DDR(VOLUME) |= VOLUME_LINE;
-#if !defined(RDA5807)
-	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 */
-#endif
+	muteVolume();
+
+	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 for PWM */
 
 	return;
 }
