@@ -4,7 +4,7 @@
 #include <avr/eeprom.h>
 
 #include "ds1307.h"
-#include "tuner.h"
+#include "tuner/tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
 #include "eeprom.h"
@@ -413,7 +413,7 @@ void segmFmEditFreq(void)
 
 void segmFmNum(void)
 {
-	uint8_t num = stationNum();
+	uint8_t num = tunerStationNum();
 
 	if (num) {
 		segmNum(num, 0, CH_C);

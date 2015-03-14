@@ -6,7 +6,7 @@
 #include "segm.h"
 #include "i2c.h"
 #include "ds1307.h"
-#include "tuner.h"
+#include "tuner/tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
 #include "eeprom.h"
@@ -26,7 +26,7 @@ static void segmBr(void)
 static void powerOn(void)
 {
 	_delay_ms(50);
-	loadTunerParams();
+	tunerPowerOn();
 
 	unmuteVolume();
 
@@ -43,7 +43,8 @@ static void powerOff(void)
 	stopEditTime();
 
 	volumeSaveParams();
-	saveTunerParams();
+	tunerPowerOff();
+
 	eeprom_update_byte(eepromDispMode, defDispMode);
 	eeprom_update_byte(eepromBrWork, brWork);
 
@@ -65,8 +66,9 @@ void hwInit(void)
 	tunerInit();
 	volumeInit();
 
-	dsOnBus = ds18x20Process();			/* Try to find temperature sensor */
+	tunerInit();
 
+	dsOnBus = ds18x20Process();			/* Try to find temperature sensor */
 
 	return;
 }
@@ -76,9 +78,6 @@ int main(void)
 	hwInit();
 
 	uint8_t dispMode = MODE_STANDBY;
-
-	loadTunerParams();
-	tunerSetFreq(9950);
 	uint8_t editFM = 0;
 
 	volumeLoadParams();
@@ -168,7 +167,7 @@ int main(void)
 			break;
 		case CMD_BTN_3:
 			if (editFM) {
-				tunerDecFreq(10);
+				tunerChangeFreq(10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
@@ -182,7 +181,7 @@ int main(void)
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
-					scanStoredFreq(SEARCH_DOWN);
+					tunerNextStation(SEARCH_DOWN);
 					dispMode = MODE_FM_CHAN;
 					setDisplayTime(DISPLAY_TIME_FM_CHAN);
 					break;
@@ -191,7 +190,7 @@ int main(void)
 			break;
 		case CMD_BTN_4:
 			if (editFM) {
-				tunerIncFreq(10);
+				tunerChangeFreq(-10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
@@ -205,7 +204,7 @@ int main(void)
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
-					scanStoredFreq(SEARCH_UP);
+					tunerNextStation(SEARCH_UP);
 					dispMode = MODE_FM_CHAN;
 					setDisplayTime(DISPLAY_TIME_FM_CHAN);
 					break;
@@ -242,12 +241,11 @@ int main(void)
 			}
 			break;
 		case CMD_BTN_4_LONG:
+			tunerStoreStation();
 			if (editFM) {
-				storeStation();
 				dispMode = MODE_FMTUNE_CHAN;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_CHAN);
 			} else {
-				storeStation();
 				dispMode = MODE_FM_CHAN;
 				setDisplayTime(DISPLAY_TIME_FM_CHAN);
 			}
@@ -270,10 +268,7 @@ int main(void)
 				setDisplayTime(DISPLAY_TIME_EDITTIME);
 				break;
 			case MODE_FMTUNE_FREQ:
-				if (encCnt > 0)
-					tunerIncFreq(1);
-				else
-					tunerDecFreq(1);
+				tunerChangeFreq(encCnt);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 				break;

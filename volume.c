@@ -65,25 +65,23 @@ int8_t getVolume(void)
 
 void muteVolume(void)
 {
-#if defined(RDA5807)
-	rda5807MuteVolume();
-	PORT(VOLUME) |= VOLUME_LINE;					/* Pull amplifier input to ground */
-#else
-	TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
-	PORT(VOLUME) &= ~VOLUME_LINE;
-#endif
+	if (tunerGetType() == TUNER_RDA5807) {
+		PORT(VOLUME) |= VOLUME_LINE;					/* Pull amplifier input to ground */
+	} else {
+		TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
+		PORT(VOLUME) &= ~VOLUME_LINE;
+	}
 
 	return;
 }
 
 void unmuteVolume(void)
 {
-#if defined(RDA5807)
-	PORT(VOLUME) &= ~VOLUME_LINE;					/* Release amplifier input */
-	rda5807UnmuteVolume();
-#else
-	TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
-#endif
+	if (tunerGetType() == TUNER_RDA5807) {
+		PORT(VOLUME) &= ~VOLUME_LINE;					/* Release amplifier input */
+	} else {
+		TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
+	}
 
 	return;
 }
@@ -91,9 +89,9 @@ void unmuteVolume(void)
 void volumeLoadParams(void)
 {
 	vol = eeprom_read_byte(eepromVolume);
-#if defined(RDA5807)
-	rda5807SetVolume(vol);
-#endif
+
+	if (tunerGetType() == TUNER_RDA5807)
+		rda5807SetVolume(vol);
 
 	return;
 }

@@ -1,25 +1,18 @@
-IND_TYPE = _CC
+IND_TYPE = _CA
 USE_TRANS = _NO
-
-TUNER = RDA5807
 
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
 
-TARG = fm7segm$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))_$(call lc,$(TUNER))
+TARG = fm7segm$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))
 
 MCU = atmega8
 F_CPU = 8000000
 
 # Source files
 
-ifeq ($(TUNER), TEA5767)
-  TUNER_SRC = tuner/tea5767.c
-else ifeq ($(TUNER), TUX032)
-  TUNER_SRC = tuner/tux032.c
-else ifeq ($(TUNER), RDA5807)
-  TUNER_SRC = tuner/rda5807.c
-endif
+TUNER_SRC = $(wildcard tuner/*.c)
+
 SRCS = $(wildcard *.c) $(TUNER_SRC)
 
 OPTIMIZE = -Os -mcall-prologues -fshort-enums
@@ -51,7 +44,7 @@ $(TARG): $(OBJS)
 
 obj/%.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -D$(TUNER) -c -o $@ $<
+	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -c -o $@ $<
 
 clean:
 	rm -rf $(OBJDIR)
