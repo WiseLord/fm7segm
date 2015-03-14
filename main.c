@@ -9,6 +9,7 @@
 #include "tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
+#include "eeprom.h"
 
 static uint8_t defDispMode = MODE_TIME;
 static int8_t brWork, brStby;

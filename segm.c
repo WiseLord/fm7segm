@@ -7,6 +7,7 @@
 #include "tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
+#include "eeprom.h"
 
 static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};

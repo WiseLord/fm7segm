@@ -2,6 +2,7 @@
 
 #include "avr/interrupt.h"
 #include "avr/eeprom.h"
+#include "eeprom.h"
 
 static volatile int8_t vol;
 

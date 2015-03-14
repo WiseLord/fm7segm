@@ -12,8 +12,6 @@
 #define VOL_MAX				16
 #endif
 
-#define eepromVolume		((uint8_t*)0x00)
-
 void volumeInit(void);
 
 void setVolume(int8_t value);

@@ -1,6 +1,7 @@
 #include "tuner.h"
 
 #include <avr/eeprom.h>
+#include "eeprom.h"
 
 uint8_t *bufFM;
 

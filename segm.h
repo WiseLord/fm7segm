@@ -67,11 +67,6 @@ enum {
 #define DISPLAY_TIME_EDITTIME		10000
 #define DISPLAY_TIME_BRIGHTNESS		2000
 
-#define eepromDispMode		((uint8_t*)0x02)
-#define eepromBrWork		((uint8_t*)0x04)
-#define eepromBrStby		((uint8_t*)0x05)
-#define eepromEncoder		((uint8_t*)0x06)
-
 #define ENC_0			0b000000
 #define ENC_A			0b000001
 #define ENC_B			0b000010
