@@ -1,4 +1,4 @@
-IND_TYPE = _CA
+IND_TYPE = _CC
 USE_TRANS = _NO
 
 # Lowercase argument

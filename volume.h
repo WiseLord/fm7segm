@@ -2,7 +2,6 @@
 #define VOLUME_H
 
 #include "pins.h"
-#include "tuner/tuner.h"
 
 #define VOL_MIN				RDA5807_VOL_MIN
 #define VOL_MAX				RDA5807_VOL_MAX
