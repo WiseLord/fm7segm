@@ -13,6 +13,7 @@ static volatile uint8_t ind[DIGITS];
 static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9};
 
 static uint8_t pos = 0;
+static uint8_t zeroHour = 0;
 
 static uint8_t useEncoder = 0;
 
@@ -68,6 +69,7 @@ void segmInit(void)
 	cmdBuf = CMD_EMPTY;
 
 	useEncoder = eeprom_read_byte(eepromEncoder);
+	zeroHour = eeprom_read_byte(eepromZeroHour);
 
 	return;
 }
@@ -348,9 +350,15 @@ void segmTimeHM(int8_t *time)
 {
 	uint8_t timeDot;
 
-	timeDot = 8;
-	if (time[SEC] % 2)
-		timeDot = 6;
+	if (zeroHour) {
+		timeDot = 8;
+		if (time[SEC] % 2)
+			timeDot = 6;
+	} else {
+		timeDot = 0;
+		if (time[SEC] % 2)
+			timeDot = 2;
+	}
 
 	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
 
@@ -361,9 +369,15 @@ void segmTimeEditH(int8_t *time)
 {
 	uint8_t timeDot;
 
-	timeDot = 8;
-	if (time[SEC] % 2)
-		timeDot = 6;
+	if (zeroHour) {
+		timeDot = 8;
+		if (time[SEC] % 2)
+			timeDot = 6;
+	} else {
+		timeDot = 0;
+		if (time[SEC] % 2)
+			timeDot = 2;
+	}
 
 	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
 	if (blink < 400) {
@@ -378,10 +392,15 @@ void segmTimeEditM(int8_t *time)
 {
 	uint8_t timeDot;
 
-	timeDot = 8;
-	if (time[SEC] % 2)
-		timeDot = 6;
-
+	if (zeroHour) {
+		timeDot = 8;
+		if (time[SEC] % 2)
+			timeDot = 6;
+	} else {
+		timeDot = 0;
+		if (time[SEC] % 2)
+			timeDot = 2;
+	}
 
 	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
 	if (blink < 400) {

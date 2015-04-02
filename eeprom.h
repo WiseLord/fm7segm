@@ -8,7 +8,10 @@
 #define eepromDispMode		((uint8_t*)0x02)
 #define eepromBrWork		((uint8_t*)0x04)
 #define eepromBrStby		((uint8_t*)0x05)
+
 #define eepromEncoder		((uint8_t*)0x06)
+
+#define eepromZeroHour		((uint8_t*)0x07)
 
 #define eepromFMFreq		((uint16_t*)0x08)
 #define eepromFMTuner		((void*)0x0A)
