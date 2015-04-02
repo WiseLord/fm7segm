@@ -307,7 +307,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	return;
 }
 
-void segmNum(int16_t number, uint8_t dotPos, uint8_t label)
+void segmNum(int16_t number, uint8_t dotPos, uint8_t label, uint8_t stInd)
 {
 	uint8_t neg = 0;
 	uint8_t i;
@@ -316,6 +316,8 @@ void segmNum(int16_t number, uint8_t dotPos, uint8_t label)
 
 	for (i = 0; i < DIGITS; i++)
 		buf[i] = CH_EMPTY;
+	if (stInd)
+		buf[0] = BIT_P;
 
 	if (number < 0) {
 		neg = 1;
@@ -325,14 +327,14 @@ void segmNum(int16_t number, uint8_t dotPos, uint8_t label)
 	for (i = 0; i < DIGITS; i++) {
 		if (number == 0 && i > dotPos)
 			break;
-		buf[i] = num[number % 10];
+		buf[i] |= num[number % 10];
 		if (i == (dotPos % DIGITS) && i)
 			buf[i] |= BIT_P;
 		number /= 10;
 	}
 
 	if (neg)
-		buf[i] = BIT_G;
+		buf[i] |= BIT_G;
 
 	ind[0] = buf[0];
 	ind[1] = buf[1];
@@ -350,7 +352,7 @@ void segmTimeHM(int8_t *time)
 	if (time[SEC] % 2)
 		timeDot = 6;
 
-	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY);
+	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
 
 	return;
 }
@@ -363,7 +365,7 @@ void segmTimeEditH(int8_t *time)
 	if (time[SEC] % 2)
 		timeDot = 6;
 
-	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY);
+	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
 	if (blink < 400) {
 		ind[2] = CH_EMPTY;
 		ind[3] = CH_EMPTY;
@@ -381,7 +383,7 @@ void segmTimeEditM(int8_t *time)
 		timeDot = 6;
 
 
-	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY);
+	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
 	if (blink < 400) {
 		ind[0] = CH_EMPTY;
 		ind[1] = CH_EMPTY;
@@ -392,7 +394,8 @@ void segmTimeEditM(int8_t *time)
 
 void segmFmFreq(void)
 {
-	segmNum(tunerGetFreq()/10, 1, CH_EMPTY);
+	tunerReadStatus();
+	segmNum(tunerGetFreq()/10, 1, CH_EMPTY, tunerStereo());
 
 	return;
 }
@@ -400,7 +403,7 @@ void segmFmFreq(void)
 void segmFmEditFreq(void)
 {
 	if (blink > 400)
-		segmNum(tunerGetFreq()/10, 1, CH_EMPTY);
+		segmNum(tunerGetFreq()/10, 1, CH_EMPTY, 0);
 	else {
 		ind[0] = CH_EMPTY;
 		ind[1] = CH_EMPTY;
@@ -416,7 +419,7 @@ void segmFmNum(void)
 	uint8_t num = tunerStationNum();
 
 	if (num) {
-		segmNum(num, 0, CH_C);
+		segmNum(num, 0, CH_C, 0);
 	} else {
 		ind[0] = BIT_G;
 		ind[1] = BIT_G;
@@ -428,14 +431,14 @@ void segmFmNum(void)
 
 void segmVol(void)
 {
-	segmNum(getVolume(), 0, CH_G);
+	segmNum(getVolume(), 0, CH_G, 0);
 
 	return;
 }
 
 void segmTemp(void)
 {
-	segmNum(ds18x20GetTemp(0), 1, CH_EMPTY);
+	segmNum(ds18x20GetTemp(0), 1, CH_EMPTY, 0);
 
 	return;
 }

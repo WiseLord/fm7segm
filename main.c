@@ -17,7 +17,7 @@ static uint8_t dsOnBus = 0;
 
 static void segmBr(void)
 {
-	segmNum(brWork, 0, CH_E);
+	segmNum(brWork, 0, CH_E, 0);
 
 	return;
 }
@@ -167,7 +167,7 @@ int main(void)
 			break;
 		case CMD_BTN_3:
 			if (editFM) {
-				tunerChangeFreq(10);
+				tunerChangeFreq(-10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
@@ -190,7 +190,7 @@ int main(void)
 			break;
 		case CMD_BTN_4:
 			if (editFM) {
-				tunerChangeFreq(-10);
+				tunerChangeFreq(10);
 				dispMode = MODE_FMTUNE_FREQ;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
@@ -241,11 +241,12 @@ int main(void)
 			}
 			break;
 		case CMD_BTN_4_LONG:
-			tunerStoreStation();
 			if (editFM) {
+			tunerStoreStation();
 				dispMode = MODE_FMTUNE_CHAN;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_CHAN);
 			} else {
+				tunerSwitchMono();
 				dispMode = MODE_FM_CHAN;
 				setDisplayTime(DISPLAY_TIME_FM_CHAN);
 			}

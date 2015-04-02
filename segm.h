@@ -98,7 +98,7 @@ enum {
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
-void segmNum(int16_t number, uint8_t dot, uint8_t label);
+void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd);
 
 void segmTimeHM(int8_t *time);
 void segmTimeEditH(int8_t *time);
