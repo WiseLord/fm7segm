@@ -1,11 +1,14 @@
 #!/bin/sh
 
-for IND_TYPE in _CA _CC
+for PINOUT in _PIN1 _PIN2
 do
-	for USE_TRANS in _NO _TR
+	for IND_TYPE in _CA _CC
 	do
-		make clean
-		make IND_TYPE=${IND_TYPE} USE_TRANS=${USE_TRANS}
+		for USE_TRANS in _NO _TR
+		do
+			make clean
+			make PINOUT=${PINOUT} IND_TYPE=${IND_TYPE} USE_TRANS=${USE_TRANS}
+		done
 	done
 done
 make clean

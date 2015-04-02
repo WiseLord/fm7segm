@@ -1,10 +1,11 @@
 IND_TYPE = _CC
 USE_TRANS = _NO
+PINOUT = _PIN1
 
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
 
-TARG = fm7segm$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))
+TARG = fm7segm$(call lc,$(PINOUT))$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))
 
 MCU = atmega8
 F_CPU = 8000000
@@ -44,7 +45,7 @@ $(TARG): $(OBJS)
 
 obj/%.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -c -o $@ $<
+	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -D$(PINOUT) -c -o $@ $<
 
 clean:
 	rm -rf $(OBJDIR)
