@@ -16,10 +16,10 @@ TUNER_SRC = $(wildcard tuner/*.c)
 
 SRCS = $(wildcard *.c) $(TUNER_SRC)
 
-OPTIMIZE = -Os -mcall-prologues -fshort-enums
+OPTIMIZE = -Os -mcall-prologues -fshort-enums -ffunction-sections -fdata-sections
 DEBUG = -g -Wall -Werror
 CFLAGS = $(DEBUG) -lm $(OPTIMIZE) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
-LDFLAGS = $(DEBUG) -mmcu=$(MCU)
+LDFLAGS = $(DEBUG) -mmcu=$(MCU) -Wl,-gc-sections
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
