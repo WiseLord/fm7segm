@@ -14,7 +14,6 @@ int8_t getVolume(void);
 void muteVolume(void);
 void unmuteVolume(void);
 
-void volumeLoadParams(void);
 void volumeSaveParams(void);
 
 #endif /* VOLUME_H */

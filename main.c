@@ -70,6 +70,11 @@ void hwInit(void)
 
 	dsOnBus = ds18x20Process();			/* Try to find temperature sensor */
 
+	defDispMode = eeprom_read_byte(eepromDispMode);
+	brWork = eeprom_read_byte(eepromBrWork);
+	brStby = eeprom_read_byte(eepromBrStby);
+	powerOff();
+
 	return;
 }
 
@@ -79,16 +84,6 @@ int main(void)
 
 	uint8_t dispMode = MODE_STANDBY;
 	uint8_t editFM = 0;
-
-	volumeLoadParams();
-	defDispMode = eeprom_read_byte(eepromDispMode);
-	brWork = eeprom_read_byte(eepromBrWork);
-	brStby = eeprom_read_byte(eepromBrStby);
-	if (brWork <= BR_MIN)
-		brWork = BR_MIN;
-	if (brWork >= BR_MAX)
-		brWork = BR_MAX;
-
 	int8_t encCnt = 0;
 	uint8_t cmd = CMD_EMPTY;
 	int8_t *time;

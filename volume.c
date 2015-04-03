@@ -21,6 +21,11 @@ void volumeInit(void)
 
 	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 for PWM */
 
+	vol = eeprom_read_byte(eepromVolume);
+
+	if (tunerGetType() == TUNER_RDA5807)
+		rda5807SetVolume(vol);
+
 	return;
 }
 
@@ -79,16 +84,6 @@ void unmuteVolume(void)
 	} else {
 		TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
 	}
-
-	return;
-}
-
-void volumeLoadParams(void)
-{
-	vol = eeprom_read_byte(eepromVolume);
-
-	if (tunerGetType() == TUNER_RDA5807)
-		rda5807SetVolume(vol);
 
 	return;
 }
