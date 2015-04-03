@@ -15,7 +15,7 @@ static const uint8_t num[] = {CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH
 static uint8_t pos = 0;
 static uint8_t zeroHour = 0;
 
-static uint8_t useEncoder = 0;
+static int8_t encRes = 0;
 
 static volatile int8_t encCnt;
 static volatile uint8_t cmdBuf;
@@ -68,7 +68,7 @@ void segmInit(void)
 	encCnt = 0;
 	cmdBuf = CMD_EMPTY;
 
-	useEncoder = eeprom_read_byte(eepromEncoder);
+	encRes = eeprom_read_byte(eepromEncRes);
 	zeroHour = eeprom_read_byte(eepromZeroHour);
 
 	return;
@@ -193,7 +193,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	uint8_t encNow = ENC_0;
 	uint8_t btnNow = BTN_STATE_0;
 
-	if (useEncoder) {
+	if (encRes) {
 		if (~PIN(ENCODER_A) & ENCODER_A_LINE)
 			encNow |= ENC_A;
 		if (~PIN(ENCODER_B) & ENCODER_B_LINE)
@@ -208,7 +208,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		btnNow |= BTN_3;
 	if (~PIN(BUTTON_4) & BUTTON_4_LINE)
 		btnNow |= BTN_4;
-	if (!useEncoder) {
+	if (!encRes) {
 		if (~PIN(ENCODER_A) & ENCODER_A_LINE)
 			btnNow |= ENC_A;
 		if (~PIN(ENCODER_B) & ENCODER_B_LINE)
@@ -216,21 +216,17 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	}
 
 	/* If encoder event has happened, inc/dec encoder counter */
-	if (useEncoder) {
-		switch (encNow) {
-		case ENC_AB:
-			if (encPrev == ENC_B)
-				encCnt++;
-			if (encPrev == ENC_A)
-				encCnt--;
-			break;
-/*		case ENC_0:
-			if (encPrev == ENC_A)
-				encCnt++;
-			if (encPrev == ENC_B)
-				encCnt--;
-			break;
-*/		}
+	if (encRes) {
+		if ((encPrev == ENC_0 && encNow == ENC_A) ||
+		    (encPrev == ENC_A && encNow == ENC_AB) ||
+		    (encPrev == ENC_AB && encNow == ENC_B) ||
+		    (encPrev == ENC_B && encNow == ENC_0))
+			encCnt--;
+		if ((encPrev == ENC_0 && encNow == ENC_B) ||
+		    (encPrev == ENC_B && encNow == ENC_AB) ||
+		    (encPrev == ENC_AB && encNow == ENC_A) ||
+		    (encPrev == ENC_A && encNow == ENC_0))
+			encCnt++;
 		encPrev = encNow; /* Save current encoder state */
 	}
 
@@ -464,8 +460,32 @@ void segmTemp(void)
 
 int8_t getEncoder(void)
 {
-	int8_t ret = encCnt;
-	encCnt = 0;
+	int8_t ret = 0;
+
+	if (encRes) {
+		if (encRes > 0) {
+			while (encCnt >= encRes) {
+				ret++;
+				encCnt -= encRes;
+			}
+			while (encCnt <= -encRes) {
+				ret--;
+				encCnt += encRes;
+			}
+		} else {
+			while (encCnt <= encRes) {
+				ret++;
+				encCnt -= encRes;
+			}
+			while (encCnt >= -encRes) {
+				ret--;
+				encCnt += encRes;
+			}
+		}
+	} else {
+		ret = encCnt;
+		encCnt = 0;
+	}
 
 	return ret;
 }

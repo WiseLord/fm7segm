@@ -9,7 +9,7 @@
 #define eepromBrWork		((uint8_t*)0x04)
 #define eepromBrStby		((uint8_t*)0x05)
 
-#define eepromEncoder		((uint8_t*)0x06)
+#define eepromEncRes		((uint8_t*)0x06)
 
 #define eepromZeroHour		((uint8_t*)0x07)
 
