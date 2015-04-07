@@ -344,41 +344,32 @@ void segmNum(int16_t number, uint8_t dotPos, uint8_t label, uint8_t stInd)
 
 void segmTimeHM(int8_t *time)
 {
-	uint8_t timeDot;
+	uint8_t chZeroHour = CH_EMPTY;
+	if (zeroHour)
+		chZeroHour = CH_0;
 
-	if (zeroHour) {
-		timeDot = 8;
-		if (time[SEC] % 2)
-			timeDot = 6;
-	} else {
-		timeDot = 0;
-		if (time[SEC] % 2)
-			timeDot = 2;
-	}
-
-	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
+	ind[0] = num[time[MIN] % 10];
+	ind[1] = num[time[MIN] / 10];
+	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 
 	return;
 }
 
 void segmTimeEditH(int8_t *time)
 {
-	uint8_t timeDot;
+	uint8_t chZeroHour = CH_EMPTY;
+	if (zeroHour)
+		chZeroHour = CH_0;
 
-	if (zeroHour) {
-		timeDot = 8;
-		if (time[SEC] % 2)
-			timeDot = 6;
-	} else {
-		timeDot = 0;
-		if (time[SEC] % 2)
-			timeDot = 2;
-	}
-
-	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
+	ind[0] = num[time[MIN] % 10];
+	ind[1] = num[time[MIN] / 10];
 	if (blink < 400) {
 		ind[2] = CH_EMPTY;
 		ind[3] = CH_EMPTY;
+	} else {
+		ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+		ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 	}
 
 	return;
@@ -386,23 +377,19 @@ void segmTimeEditH(int8_t *time)
 
 void segmTimeEditM(int8_t *time)
 {
-	uint8_t timeDot;
+	uint8_t chZeroHour = CH_EMPTY;
+	if (zeroHour)
+		chZeroHour = CH_0;
 
-	if (zeroHour) {
-		timeDot = 8;
-		if (time[SEC] % 2)
-			timeDot = 6;
-	} else {
-		timeDot = 0;
-		if (time[SEC] % 2)
-			timeDot = 2;
-	}
-
-	segmNum(100 * time[HOUR] + time[MIN], timeDot, CH_EMPTY, 0);
 	if (blink < 400) {
 		ind[0] = CH_EMPTY;
 		ind[1] = CH_EMPTY;
+	} else {
+		ind[0] = num[time[MIN] % 10];
+		ind[1] = num[time[MIN] / 10];
 	}
+	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 
 	return;
 }
