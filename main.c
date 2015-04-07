@@ -13,7 +13,7 @@
 
 static uint8_t defDispMode = MODE_TIME;
 static int8_t brWork, brStby;
-static uint8_t dsOnBus = 0;
+static uint8_t dsCnt = 0;
 
 static void segmBr(void)
 {
@@ -49,16 +49,16 @@ static void powerOff(void)
 
 void hwInit(void)
 {
-	uint8_t i, cnt = 0;
+	uint8_t i;
 
 	_delay_ms(100);
 
 	sei();
 	/* 5 attempts to find temperature sensors */
-	for (i = 0; i < 5 && !cnt; i++) {
-		_delay_ms(10);
+	for (i = 0; i < 5 && !dsCnt; i++) {
+		_delay_ms(1);
 		ds18x20SearchDevices();
-		cnt = getDevCount();
+		dsCnt = getDevCount();
 	}
 
 	segmInit();							/* Indicator */
@@ -66,8 +66,6 @@ void hwInit(void)
 	ds1307Init();						/* RTC */
 	tunerInit();
 	volumeInit();
-
-	dsOnBus = ds18x20Process();			/* Try to find temperature sensor */
 
 	defDispMode = eeprom_read_byte(eepromDispMode);
 	brWork = eeprom_read_byte(eepromBrWork);
@@ -91,8 +89,13 @@ int main(void)
 		encCnt = getEncoder();
 		cmd = getBtnCmd();
 		time = readTime();
-		if (dsOnBus)
+		/* If temperature sensor has not still found, continue searching */
+		if (!dsCnt) {
+			ds18x20SearchDevices();
+			dsCnt = getDevCount();
+		} else {
 			ds18x20Process();
+		}
 
 		/* Don't handle commands in standby mode except STBY */
 		if (dispMode == MODE_STANDBY) {
@@ -143,7 +146,7 @@ int main(void)
 				}
 			} else {
 				if (dispMode == MODE_TIME) {
-					if (dsOnBus) {
+					if (dsCnt) {
 						dispMode = MODE_TEMP;
 						setDisplayTime(DISPLAY_TIME_TEMP);
 					} else {
@@ -153,7 +156,7 @@ int main(void)
 					}
 				} else {
 					dispMode = MODE_TIME;
-					if (!dsOnBus)
+					if (!dsCnt)
 						defDispMode = MODE_TIME;
 					setDisplayTime(DISPLAY_TIME_TIME);
 				}
@@ -313,7 +316,7 @@ int main(void)
 		/* Show things */
 		switch (dispMode) {
 		case MODE_STANDBY:
-			if (dsOnBus && (time[SEC] % 15 >= 13)) { /* Every 20 sec for 2 sec*/
+			if (dsCnt && (time[SEC] % 15 >= 13)) { /* Every 20 sec for 2 sec*/
 				segmTemp();
 			} else {
 				segmTimeHM(time);
@@ -333,7 +336,7 @@ int main(void)
 			segmFmEditFreq();
 			break;
 		case MODE_TIME:
-			if (dsOnBus && (time[SEC] % 15 >= 13) && !getDisplayTime()) {
+			if (dsCnt && (time[SEC] % 15 >= 13) && !getDisplayTime()) {
 				segmTemp();
 			} else {
 				segmTimeHM(time);
