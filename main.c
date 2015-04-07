@@ -25,12 +25,9 @@ static void segmBr(void)
 /* Handle leaving standby mode */
 static void powerOn(void)
 {
-	_delay_ms(50);
-	tunerPowerOn();
-
 	unmuteVolume();
-
 	setBrightness(brWork);
+	tunerSetFreq(tunerGetFreq());
 
 	return;
 }
@@ -38,17 +35,14 @@ static void powerOn(void)
 /* Handle entering standby mode */
 static void powerOff(void)
 {
-	muteVolume();
-
 	stopEditTime();
+	setBrightness(brStby);
 
+	muteVolume();
 	volumeSaveParams();
-	tunerPowerOff();
 
 	eeprom_update_byte(eepromDispMode, defDispMode);
 	eeprom_update_byte(eepromBrWork, brWork);
-
-	setBrightness(brStby);
 
 	return;
 }
@@ -65,8 +59,6 @@ void hwInit(void)
 	ds1307Init();						/* RTC */
 	tunerInit();
 	volumeInit();
-
-	tunerInit();
 
 	dsOnBus = ds18x20Process();			/* Try to find temperature sensor */
 
