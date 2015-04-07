@@ -249,6 +249,11 @@ void ds18x20SearchDevices(void)
 	return;
 }
 
+uint8_t getDevCount(void)
+{
+	return devCount;
+}
+
 uint8_t ds18x20Process(void)
 {
 	if (getTempTimer() == 0) {

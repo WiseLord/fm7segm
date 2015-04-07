@@ -49,10 +49,17 @@ static void powerOff(void)
 
 void hwInit(void)
 {
+	uint8_t i, cnt = 0;
+
 	_delay_ms(100);
 
 	sei();
-	ds18x20SearchDevices();
+	/* 5 attempts to find temperature sensors */
+	for (i = 0; i < 5 && !cnt; i++) {
+		_delay_ms(10);
+		ds18x20SearchDevices();
+		cnt = getDevCount();
+	}
 
 	segmInit();							/* Indicator */
 	I2CInit();							/* I2C bus */
