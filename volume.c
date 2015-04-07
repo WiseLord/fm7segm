@@ -17,14 +17,13 @@ static const int8_t volPwms[] = {
 void volumeInit(void)
 {
 	DDR(VOLUME) |= VOLUME_LINE;
-	muteVolume();
-
 	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 for PWM */
 
 	vol = eeprom_read_byte(eepromVolume);
-
 	if (tunerGetType() == TUNER_RDA5807)
 		rda5807SetVolume(vol);
+
+	muteVolume();
 
 	return;
 }
@@ -67,6 +66,8 @@ int8_t getVolume(void)
 
 void muteVolume(void)
 {
+	tunerSetMute(1);
+
 	if (tunerGetType() == TUNER_RDA5807) {
 		PORT(VOLUME) |= VOLUME_LINE;					/* Pull amplifier input to ground */
 	} else {
@@ -79,6 +80,8 @@ void muteVolume(void)
 
 void unmuteVolume(void)
 {
+	tunerSetMute(0);
+
 	if (tunerGetType() == TUNER_RDA5807) {
 		PORT(VOLUME) &= ~VOLUME_LINE;					/* Release amplifier input */
 	} else {
