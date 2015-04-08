@@ -4,8 +4,6 @@
 #include "avr/eeprom.h"
 #include "eeprom.h"
 
-#include "tuner/tuner.h"
-
 static volatile int8_t vol;
 
 static const int8_t volPwms[] = {
@@ -19,9 +17,7 @@ void volumeInit(void)
 	DDR(VOLUME) |= VOLUME_LINE;
 	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 for PWM */
 
-	vol = eeprom_read_byte(eepromVolume);
-	if (tunerGetType() == TUNER_RDA5807)
-		rda5807SetVolume(vol);
+	setVolume(eeprom_read_byte(eepromVolume));
 
 	muteVolume();
 
