@@ -26,6 +26,7 @@ static void segmBr(void)
 static void powerOn(void)
 {
 	unmuteVolume();
+	setVolume(getVolume());
 	setBrightness(brWork);
 	tunerSetFreq(tunerGetFreq());
 
@@ -43,6 +44,9 @@ static void powerOff(void)
 
 	eeprom_update_byte(eepromDispMode, defDispMode);
 	eeprom_update_byte(eepromBrWork, brWork);
+
+	eeprom_update_word(eepromFMFreq, tunerGetFreq());
+	eeprom_update_byte(eepromFMMono, tunerGetMono());
 
 	return;
 }

@@ -30,6 +30,7 @@ tunerIC tunerGetType(void);
 
 void tunerSetFreq(uint16_t freq);
 uint16_t tunerGetFreq(void);
+uint8_t tunerGetMono(void);
 
 void tunerChangeFreq(int8_t mult);
 

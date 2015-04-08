@@ -78,6 +78,11 @@ uint16_t tunerGetFreq(void)
 	return _freq;
 }
 
+uint8_t tunerGetMono(void)
+{
+	return _mono;
+}
+
 void tunerChangeFreq(int8_t mult)
 {
 	tunerSetFreq(_freq + _step * mult);
