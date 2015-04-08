@@ -236,9 +236,22 @@ int main(void)
 				setDisplayTime(DISPLAY_TIME_FM_CHAN);
 				editFM = 0;
 			} else {
-				dispMode = MODE_FMTUNE_FREQ;
-				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
-				editFM = 1;
+				switch (dispMode) {
+				case MODE_TIME_EDIT_H:
+					changeTimeH(-10);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				case MODE_TIME_EDIT_M:
+					changeTimeM(-10);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				default:
+					dispMode = MODE_FMTUNE_FREQ;
+					setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
+					editFM = 1;
+					break;
+				}
+
 			}
 			break;
 		case CMD_BTN_4_LONG:
@@ -247,9 +260,21 @@ int main(void)
 				dispMode = MODE_FMTUNE_CHAN;
 				setDisplayTime(DISPLAY_TIME_FMTUNE_CHAN);
 			} else {
-				tunerSwitchMono();
-				dispMode = MODE_FM_CHAN;
-				setDisplayTime(DISPLAY_TIME_FM_CHAN);
+				switch (dispMode) {
+				case MODE_TIME_EDIT_H:
+					changeTimeH(10);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				case MODE_TIME_EDIT_M:
+					changeTimeM(10);
+					setDisplayTime(DISPLAY_TIME_EDITTIME);
+					break;
+				default:
+					tunerSwitchMono();
+					dispMode = MODE_FM_CHAN;
+					setDisplayTime(DISPLAY_TIME_FM_CHAN);
+					break;
+				}
 			}
 			break;
 		default:
