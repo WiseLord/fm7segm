@@ -396,8 +396,14 @@ void segmTimeEditM(int8_t *time)
 
 void segmFmFreq(void)
 {
+	uint16_t freq;
+
 	tunerReadStatus();
-	segmNum(tunerGetFreq()/10, 1, CH_EMPTY, tunerStereo());
+	freq = tunerGetFreq();
+	if (freq > 7600)
+		segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
+	else
+		segmNum(freq, 2, CH_EMPTY, tunerStereo());
 
 	return;
 }
