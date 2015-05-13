@@ -6,7 +6,7 @@
 uint8_t *bufFM;
 static tunerIC _tuner;
 
-static uint16_t _freq;
+static uint16_t _freq, _fMin, _fMax;
 static uint8_t _mono;
 static uint8_t _step;
 
@@ -17,6 +17,8 @@ void tunerInit(void)
 	ctrl = eeprom_read_byte(eepromFMCtrl);
 	_tuner = eeprom_read_byte(eepromFMTuner);
 	_freq = eeprom_read_word(eepromFMFreq);
+	_fMin = eeprom_read_word(eepromFMFreqMin);
+	_fMax = eeprom_read_word(eepromFMFreqMax);
 	_mono = eeprom_read_byte(eepromFMMono);
 	_step = eeprom_read_byte(eepromFMStep);
 
@@ -49,10 +51,10 @@ tunerIC tunerGetType(void)
 
 void tunerSetFreq(uint16_t freq)
 {
-	if (freq > FM_FREQ_MAX)
-		freq = FM_FREQ_MAX;
-	if (freq < FM_FREQ_MIN)
-		freq = FM_FREQ_MIN;
+	if (freq > _fMax)
+		freq = _fMax;
+	if (freq < _fMin)
+		freq = _fMin;
 
 	_freq = freq;
 
