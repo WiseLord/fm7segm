@@ -13,13 +13,16 @@
 
 #define eepromZeroHour		((uint8_t*)0x07)
 
-#define eepromFMFreq		((uint16_t*)0x08)
-#define eepromFMTuner		((void*)0x0A)
-#define eepromFMMono		((void*)0x0C)
-#define eepromFMStep		((void*)0x0D)
-#define eepromFMCtrl		((void*)0x0E)
+#define eepromFMFreq		((uint16_t*)0x10)
+#define eepromFMFreqMin		((uint16_t*)0x14)
+#define eepromFMFreqMax		((uint16_t*)0x16)
 
-#define eepromStations		((uint16_t*)0x10)
-#define eepromFavStations	((uint16_t*)0x78)
+#define eepromFMTuner		((void*)0x1A)
+#define eepromFMMono		((void*)0x1C)
+#define eepromFMStep		((void*)0x1D)
+#define eepromFMCtrl		((void*)0x1E)
+
+#define eepromStations		((uint16_t*)0x20)
+#define eepromFavStations	((uint16_t*)0x88)
 
 #endif /* EEPROM_H */
