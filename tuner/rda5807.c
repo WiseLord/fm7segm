@@ -2,7 +2,7 @@
 
 #include "../i2c.h"
 
-static uint8_t wrBuf[8];
+static uint8_t wrBuf[14];
 static uint8_t rdBuf[5];
 static uint8_t _volume = RDA5807_VOL_MAX;
 
@@ -28,6 +28,12 @@ void rda5807Init(void)
 	wrBuf[5] = 0;
 	wrBuf[6] = 0b1000 & RDA5807_SEEKTH;
 	wrBuf[7] = RDA5807_LNA_PORT_SEL | RDA5807_VOLUME;
+	wrBuf[8] = 0;
+	wrBuf[9] = 0;
+	wrBuf[10] = 0x80 & RDA5807_TH_SOFRBLEND;
+	wrBuf[11] = RDA5807_FREQ_MODE;
+	wrBuf[12] = 0;
+	wrBuf[13] = 0;
 
 	rda5807WriteI2C();
 
@@ -36,17 +42,20 @@ void rda5807Init(void)
 
 void rda5807SetFreq(uint16_t freq, uint8_t mono)
 {
-	uint16_t chan = (freq - RDA5807_FREQ_MIN) / RDA5807_CHAN_SPACING;
+//	uint16_t chan = (freq - RDA5807_FREQ_MIN) / RDA5807_CHAN_SPACING;
 
 	if (mono)
 		wrBuf[0] |= RDA5807_MONO;
 	else
 		wrBuf[0] &= ~RDA5807_MONO;
 
-	wrBuf[2] = chan >> 2;								/* 8 MSB */
+//	wrBuf[2] = chan >> 2;								/* 8 MSB */
 
-	wrBuf[3] &= 0x3F;
-	wrBuf[3] |= RDA5807_TUNE | ((chan & 0x03) << 6);	/* 2 LSB */
+//	wrBuf[3] &= 0x3F;
+//	wrBuf[3] |= RDA5807_TUNE | ((chan & 0x03) << 6);	/* 2 LSB */
+
+	wrBuf[12] = ((freq - 5000) * 10) >> 8;
+	wrBuf[13] = ((freq - 5000) * 10) & 0xFF;
 
 	rda5807WriteI2C();
 
