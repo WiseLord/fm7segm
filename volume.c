@@ -50,7 +50,7 @@ void setVolume(int8_t value)
 	vol = value;
 
 	if (tunerGetType() == TUNER_RDA5807)
-		rda5807SetVolume(value);
+		rda580xSetVolume(value);
 
 	return;
 }

@@ -147,16 +147,21 @@
 #define RDA5807_BUF_READY(buf)	(buf[3] & RDA5807_FM_READY)
 #define RDA5807_BUF_STEREO(buf)	(buf[0] & RDA5807_ST)
 
-void rda5807Init(void);
+typedef enum {
+	RDA5807_GRID_FREQ,
+	RDA5807_DIRECT_FREQ,
+} freqMethod;
 
-void rda5807SetFreq(uint16_t freq, uint8_t mono);
+void rda580xInit(freqMethod frMeth);
 
-uint8_t *rda5807ReadStatus(void);
+void rda580xSetFreq(uint16_t freq, uint8_t mono, freqMethod frMeth);
 
-void rda5807SetMute(uint8_t mute);
-void rda5807SetVolume(int8_t value);
+uint8_t *rda580xReadStatus(void);
 
-void rda5807PowerOn(void);
-void rda5807PowerOff(void);
+void rda580xSetMute(uint8_t mute);
+void rda580xSetVolume(int8_t value);
+
+void rda580xPowerOn(void);
+void rda580xPowerOff(void);
 
 #endif /* RDA5807M_H */

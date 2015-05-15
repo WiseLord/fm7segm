@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 #include "tea5767.h"
-#include "rda5807.h"
+#include "rda580x.h"
 #include "tux032.h"
 
 typedef enum {
@@ -11,6 +11,7 @@ typedef enum {
 	TUNER_TEA5767,
 	TUNER_RDA5807,
 	TUNER_TUX032,
+	TUNER_RDA5802,
 	TUNER_END
 } tunerIC;
 

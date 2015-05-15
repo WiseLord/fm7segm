@@ -30,10 +30,13 @@ void tunerInit(void)
 		tea5767Init(ctrl);
 		break;
 	case TUNER_RDA5807:
-		rda5807Init();
+		rda580xInit(RDA5807_DIRECT_FREQ);
 		break;
 	case TUNER_TUX032:
 		tux032Init();
+		break;
+	case TUNER_RDA5802:
+		rda580xInit(RDA5807_GRID_FREQ);
 		break;
 	default:
 		break;
@@ -63,10 +66,13 @@ void tunerSetFreq(uint16_t freq)
 		tea5767SetFreq(_freq, _mono);
 		break;
 	case TUNER_RDA5807:
-		rda5807SetFreq(_freq, _mono);
+		rda580xSetFreq(_freq, _mono, RDA5807_DIRECT_FREQ);
 		break;
 	case TUNER_TUX032:
 		tux032SetFreq(_freq);
+		break;
+	case TUNER_RDA5802:
+		rda580xSetFreq(_freq, _mono, RDA5807_GRID_FREQ);
 		break;
 	default:
 		break;
@@ -99,7 +105,7 @@ void tunerReadStatus(void)
 		bufFM = tea5767ReadStatus();
 		break;
 	case TUNER_RDA5807:
-		bufFM = rda5807ReadStatus();
+		bufFM = rda580xReadStatus();
 		break;
 	case TUNER_TUX032:
 		bufFM = tux032ReadStatus();
@@ -298,7 +304,7 @@ void tunerSetMute(uint8_t mute)
 		tea5767SetMute(mute);
 		break;
 	case TUNER_RDA5807:
-		rda5807SetMute(mute);
+		rda580xSetMute(mute);
 		break;
 	case TUNER_TUX032:
 		tux032SetMute(mute);
@@ -317,7 +323,7 @@ void tunerPowerOn(void)
 		tea5767PowerOn();
 		break;
 	case TUNER_RDA5807:
-		rda5807PowerOn();
+		rda580xPowerOn();
 		break;
 	case TUNER_TUX032:
 		tux032PowerOn();
@@ -342,7 +348,7 @@ void tunerPowerOff(void)
 		tea5767PowerOff();
 		break;
 	case TUNER_RDA5807:
-		rda5807PowerOff();
+		rda580xPowerOff();
 		break;
 	case TUNER_TUX032:
 		tux032PowerOff();
