@@ -8,7 +8,7 @@ static tunerIC _tuner;
 
 static uint16_t _freq, _fMin, _fMax;
 static uint8_t _mono;
-static uint8_t _step;
+static uint8_t _step1, _step2;
 
 void tunerInit(void)
 {
@@ -20,7 +20,8 @@ void tunerInit(void)
 	_fMin = eeprom_read_word(eepromFMFreqMin);
 	_fMax = eeprom_read_word(eepromFMFreqMax);
 	_mono = eeprom_read_byte(eepromFMMono);
-	_step = eeprom_read_byte(eepromFMStep);
+	_step1 = eeprom_read_byte(eepromFMStep1);
+	_step2 = eeprom_read_byte(eepromFMStep2);
 
 	if (_tuner >= TUNER_END)
 		_tuner = TUNER_TEA5767;
@@ -93,7 +94,21 @@ uint8_t tunerGetMono(void)
 
 void tunerChangeFreq(int8_t mult)
 {
-	tunerSetFreq(_freq + _step * mult);
+	uint16_t freq;
+
+	if (mult > 0) {
+		if (_freq >= 7600)
+			freq = _freq + _step2 * mult;
+		else
+			freq = _freq + _step1 * mult;
+	} else {
+		if (_freq <= 7600)
+			freq = _freq + _step1 * mult;
+		else
+			freq = _freq + _step2 * mult;
+	}
+
+	tunerSetFreq(freq);
 
 	return;
 }

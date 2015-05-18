@@ -400,10 +400,14 @@ void segmFmFreq(void)
 
 	tunerReadStatus();
 	freq = tunerGetFreq();
-	if (freq > 7600)
+	if (freq >= 10000) {
 		segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
-	else
-		segmNum(freq, 2, CH_EMPTY, tunerStereo());
+	} else {
+		if (freq >= 7600 && eeprom_read_byte(eepromFMStep2) >= 10)
+			segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
+		else
+			segmNum(freq, 2, CH_EMPTY, tunerStereo());
+	}
 
 	return;
 }
@@ -414,7 +418,8 @@ void segmFmEditFreq(void)
 
 	freq = tunerGetFreq();
 	if (blink > 400) {
-		if (freq > 7600)
+		if ((freq >= 7600 && eeprom_read_byte(eepromFMStep2) >= 10) ||
+		    (freq < 7600 && eeprom_read_byte(eepromFMStep1) >= 10))
 			segmNum(freq/10, 1, CH_EMPTY, 0);
 		else
 			segmNum(freq, 2, CH_EMPTY, 0);

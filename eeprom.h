@@ -19,8 +19,9 @@
 
 #define eepromFMTuner		((void*)0x1A)
 #define eepromFMMono		((void*)0x1C)
-#define eepromFMStep		((void*)0x1D)
-#define eepromFMCtrl		((void*)0x1E)
+#define eepromFMStep1		((void*)0x1D)
+#define eepromFMStep2		((void*)0x1E)
+#define eepromFMCtrl		((void*)0x1F)
 
 #define eepromStations		((uint16_t*)0x20)
 #define eepromFavStations	((uint16_t*)0x88)
