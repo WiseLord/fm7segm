@@ -410,9 +410,15 @@ void segmFmFreq(void)
 
 void segmFmEditFreq(void)
 {
-	if (blink > 400)
-		segmNum(tunerGetFreq()/10, 1, CH_EMPTY, 0);
-	else {
+	uint16_t freq;
+
+	freq = tunerGetFreq();
+	if (blink > 400) {
+		if (freq > 7600)
+			segmNum(freq/10, 1, CH_EMPTY, 0);
+		else
+			segmNum(freq, 2, CH_EMPTY, 0);
+	} else {
 		ind[0] = CH_EMPTY;
 		ind[1] = CH_EMPTY;
 		ind[2] = CH_EMPTY;
