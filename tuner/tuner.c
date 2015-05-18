@@ -105,6 +105,7 @@ void tunerReadStatus(void)
 		bufFM = tea5767ReadStatus();
 		break;
 	case TUNER_RDA5807:
+	case TUNER_RDA5802:
 		bufFM = rda580xReadStatus();
 		break;
 	case TUNER_TUX032:
@@ -121,7 +122,9 @@ void tunerSwitchMono(void)
 {
 	_mono = !_mono;
 
-	if (_tuner == TUNER_TEA5767 || _tuner == TUNER_RDA5807)
+	if (_tuner == TUNER_TEA5767 ||
+	    _tuner == TUNER_RDA5807 ||
+	    _tuner == TUNER_RDA5807)
 		tunerSetFreq(tunerGetFreq());
 
 	return;
@@ -136,6 +139,7 @@ uint8_t tunerStereo(void)
 		ret = TEA5767_BUF_STEREO(bufFM) && !_mono;
 		break;
 	case TUNER_RDA5807:
+	case TUNER_RDA5802:
 		ret = RDA5807_BUF_STEREO(bufFM) && !_mono;
 		break;
 	case TUNER_TUX032:
@@ -158,6 +162,7 @@ uint8_t tunerLevel(void)
 		ret = (bufFM[3] & TEA5767_LEV_MASK) >> 4;
 		break;
 	case TUNER_RDA5807:
+	case TUNER_RDA5802:
 		rawLevel = (bufFM[2] & RDA5807_RSSI) >> 1;
 		if (rawLevel < 24)
 			ret = 0;
@@ -304,6 +309,7 @@ void tunerSetMute(uint8_t mute)
 		tea5767SetMute(mute);
 		break;
 	case TUNER_RDA5807:
+	case TUNER_RDA5802:
 		rda580xSetMute(mute);
 		break;
 	case TUNER_TUX032:
@@ -323,6 +329,7 @@ void tunerPowerOn(void)
 		tea5767PowerOn();
 		break;
 	case TUNER_RDA5807:
+	case TUNER_RDA5802:
 		rda580xPowerOn();
 		break;
 	case TUNER_TUX032:
@@ -348,6 +355,7 @@ void tunerPowerOff(void)
 		tea5767PowerOff();
 		break;
 	case TUNER_RDA5807:
+	case TUNER_RDA5802:
 		rda580xPowerOff();
 		break;
 	case TUNER_TUX032:

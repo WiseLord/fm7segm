@@ -6,12 +6,15 @@ static uint8_t wrBuf[14];
 static uint8_t rdBuf[5];
 static uint8_t _volume = RDA5807_VOL_MAX;
 
-static void rda580xWriteI2C(void)
+static void rda580xWriteI2C(uint8_t bytes)
 {
 	uint8_t i;
 
+	if (!bytes)
+		bytes = sizeof(wrBuf);
+
 	I2CStart(RDA5807M_I2C_ADDR);
-	for (i = 0; i < sizeof(wrBuf); i++)
+	for (i = 0; i < bytes; i++)
 		I2CWriteByte(wrBuf[i]);
 	I2CStop();
 
@@ -37,7 +40,7 @@ void rda580xInit(freqMethod frMeth)
 		wrBuf[13] = 0;
 	}
 
-	rda580xWriteI2C();
+	rda580xWriteI2C(0);
 
 	return;
 }
@@ -61,7 +64,7 @@ void rda580xSetFreq(uint16_t freq, uint8_t mono, freqMethod frMeth)
 		wrBuf[3] |= RDA5807_TUNE | ((chan & 0x03) << 6);	/* 2 LSB */
 	}
 
-	rda580xWriteI2C();
+	rda580xWriteI2C(0);
 
 	return;
 }
@@ -87,7 +90,7 @@ void rda580xSetMute(uint8_t mute)
 		wrBuf[0] |= RDA5807_DMUTE;
 	wrBuf[3] &= ~RDA5807_TUNE;
 
-	rda580xWriteI2C();
+	rda580xWriteI2C(8);
 
 	return;
 }

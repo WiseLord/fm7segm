@@ -49,7 +49,8 @@ void setVolume(int8_t value)
 
 	vol = value;
 
-	if (tunerGetType() == TUNER_RDA5807)
+	if (tunerGetType() == TUNER_RDA5807 ||
+	    tunerGetType() == TUNER_RDA5802)
 		rda580xSetVolume(value);
 
 	return;
@@ -64,7 +65,8 @@ void muteVolume(void)
 {
 	tunerSetMute(1);
 
-	if (tunerGetType() == TUNER_RDA5807) {
+	if (tunerGetType() == TUNER_RDA5807 ||
+	    tunerGetType() == TUNER_RDA5802) {
 		PORT(VOLUME) |= VOLUME_LINE;					/* Pull amplifier input to ground */
 	} else {
 		TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
@@ -78,7 +80,8 @@ void unmuteVolume(void)
 {
 	tunerSetMute(0);
 
-	if (tunerGetType() == TUNER_RDA5807) {
+	if (tunerGetType() == TUNER_RDA5807 ||
+	    tunerGetType() == TUNER_RDA5802) {
 		PORT(VOLUME) &= ~VOLUME_LINE;					/* Release amplifier input */
 	} else {
 		TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
