@@ -26,7 +26,7 @@ void rda580xInit(freqMethod frMeth)
 	wrBuf[0] = RDA5807_DHIZ;
 	wrBuf[1] = RDA5807_CLK_MODE_32768 | RDA5807_NEW_METHOD | RDA5807_ENABLE;
 	wrBuf[2] = 0;
-	wrBuf[3] = RDA5807_BAND | RDA5807_SPACE;
+	wrBuf[3] = RDA5807_BAND_EASTEUROPE | RDA5807_SPACE_50;
 	wrBuf[4] = 0;
 	wrBuf[5] = 0;
 	wrBuf[6] = 0b1000 & RDA5807_SEEKTH;
@@ -36,9 +36,12 @@ void rda580xInit(freqMethod frMeth)
 	if (frMeth == RDA5807_DIRECT_FREQ) {
 		wrBuf[10] = 0x80 & RDA5807_TH_SOFRBLEND;
 		wrBuf[11] = RDA5807_FREQ_MODE;
-		wrBuf[12] = 0;
-		wrBuf[13] = 0;
+	} else {
+		wrBuf[10] = (0x80 & RDA5807_TH_SOFRBLEND) | RDA5807_65M_50M_MODE;
+		wrBuf[11] = 0;
 	}
+	wrBuf[12] = 0;
+	wrBuf[13] = 0;
 
 	rda580xWriteI2C(0);
 
@@ -58,7 +61,7 @@ void rda580xSetFreq(uint16_t freq, uint8_t mono, freqMethod frMeth)
 		wrBuf[12] = ((freq - 5000) * 10) >> 8;
 		wrBuf[13] = ((freq - 5000) * 10) & 0xFF;
 	} else {
-		chan = (freq - RDA5807_FREQ_MIN) / RDA5807_CHAN_SPACING;
+		chan = (freq - 6500) / RDA5807_CHAN_SPACING;
 		wrBuf[2] = chan >> 2;								/* 8 MSB */
 		wrBuf[3] &= 0x3F;
 		wrBuf[3] |= RDA5807_TUNE | ((chan & 0x03) << 6);	/* 2 LSB */
