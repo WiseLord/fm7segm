@@ -249,16 +249,28 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 					cmdBuf = CMD_BTN_4_LONG;
 					break;
 				}
-			} else if (btnCnt == LONG_PRESS + AUTOREPEAT) {
-				switch (btnPrev) {
-				case ENC_A:
-					encCnt++;
-					break;
-				case ENC_B:
-					encCnt--;
-					break;
+				if (!encRes) {
+					switch (btnPrev) {
+					case (BTN_1 | ENC_A):
+						cmdBuf = CMD_BTN_4_LONG;
+						break;
+					case (BTN_2 | ENC_B):
+						cmdBuf = CMD_BTN_3_LONG;
+						break;
+					}
 				}
-				btnCnt = LONG_PRESS + 1;
+			} else if (!encRes) {
+				if (btnCnt == LONG_PRESS + AUTOREPEAT) {
+					switch (btnPrev) {
+					case ENC_A:
+						encCnt++;
+						break;
+					case ENC_B:
+						encCnt--;
+						break;
+					}
+					btnCnt = LONG_PRESS + 1;
+				}
 			}
 		} else {
 			btnPrev = btnNow;
@@ -278,12 +290,16 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 			case BTN_4:
 				cmdBuf = CMD_BTN_4;
 				break;
-			case ENC_A:
-				encCnt++;
-				break;
-			case ENC_B:
-				encCnt--;
-				break;
+			}
+			if (!encRes) {
+				switch (btnPrev) {
+				case ENC_A:
+					cmdBuf = CMD_BTN_4;
+					break;
+				case ENC_B:
+					cmdBuf = CMD_BTN_3;
+					break;
+				}
 			}
 		}
 		btnCnt = 0;

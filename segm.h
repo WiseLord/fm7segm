@@ -93,8 +93,8 @@ enum {
 
 // Handling long press actions */
 #define SHORT_PRESS		400
-#define LONG_PRESS		2400
-#define AUTOREPEAT		800
+#define LONG_PRESS		1600
+#define AUTOREPEAT		600
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
