@@ -76,6 +76,18 @@ void segmInit(void)
 
 ISR (TIMER2_COMP_vect)
 {
+	/* Switch off digits */
+#if defined(INV_DIG)
+	PORT(DIG_0) |= DIG_0_LINE;
+	PORT(DIG_1) |= DIG_1_LINE;
+	PORT(DIG_2) |= DIG_2_LINE;
+	PORT(DIG_3) |= DIG_3_LINE;
+#else
+	PORT(DIG_0) &= ~DIG_0_LINE;
+	PORT(DIG_1) &= ~DIG_1_LINE;
+	PORT(DIG_2) &= ~DIG_2_LINE;
+	PORT(DIG_3) &= ~DIG_3_LINE;
+#endif
 	/* Switch off segments */
 #if defined(_CC)
 	PORT(SEG_A) &= ~SEG_A_LINE;
@@ -96,58 +108,11 @@ ISR (TIMER2_COMP_vect)
 	PORT(SEG_G) |= SEG_G_LINE;
 	PORT(SEG_P) |= SEG_P_LINE;
 #endif
-#if defined(INV_DIG)
-	PORT(DIG_0) |= DIG_0_LINE;
-	PORT(DIG_1) |= DIG_1_LINE;
-	PORT(DIG_2) |= DIG_2_LINE;
-	PORT(DIG_3) |= DIG_3_LINE;
-#else
-	PORT(DIG_0) &= ~DIG_0_LINE;
-	PORT(DIG_1) &= ~DIG_1_LINE;
-	PORT(DIG_2) &= ~DIG_2_LINE;
-	PORT(DIG_3) &= ~DIG_3_LINE;
-#endif
-
 }
 
 ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 {
 	uint8_t dig = ind[pos];
-
-	/* Change current digit */
-#if defined(INV_DIG)
-	switch (pos) {
-	case 3:
-		PORT(DIG_3) &= ~DIG_3_LINE;
-		break;
-	case 2:
-		PORT(DIG_2) &= ~DIG_2_LINE;
-		break;
-	case 1:
-		PORT(DIG_1) &= ~DIG_1_LINE;
-		break;
-	default:
-		PORT(DIG_0) &= ~DIG_0_LINE;
-		break;
-	}
-#else
-	switch (pos) {
-	case 3:
-		PORT(DIG_3) |= DIG_3_LINE;
-		break;
-	case 2:
-		PORT(DIG_2) |= DIG_2_LINE;
-		break;
-	case 1:
-		PORT(DIG_1) |= DIG_1_LINE;
-		break;
-	default:
-		PORT(DIG_0) |= DIG_0_LINE;
-		break;
-	}
-#endif
-	if (++pos > 3)
-		pos = 0;
 
 	/* Set data on segments */
 #if defined(_CC)
@@ -186,8 +151,44 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		PORT(SEG_P) &= ~SEG_P_LINE;
 #endif
 
-	/* Handling buttons and encoder events */
+	/* Change current digit */
+#if defined(INV_DIG)
+	switch (pos) {
+	case 3:
+		PORT(DIG_3) &= ~DIG_3_LINE;
+		break;
+	case 2:
+		PORT(DIG_2) &= ~DIG_2_LINE;
+		break;
+	case 1:
+		PORT(DIG_1) &= ~DIG_1_LINE;
+		break;
+	default:
+		PORT(DIG_0) &= ~DIG_0_LINE;
+		break;
+	}
+#else
+	switch (pos) {
+	case 3:
+		PORT(DIG_3) |= DIG_3_LINE;
+		break;
+	case 2:
+		PORT(DIG_2) |= DIG_2_LINE;
+		break;
+	case 1:
+		PORT(DIG_1) |= DIG_1_LINE;
+		break;
+	default:
+		PORT(DIG_0) |= DIG_0_LINE;
+		break;
+	}
+#endif
 
+	/* Co to next digit */
+	if (++pos > 3)
+		pos = 0;
+
+	/* Handling buttons and encoder events */
 	static int16_t btnCnt = 0;
 
 	uint8_t encNow = ENC_0;
@@ -313,7 +314,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	if (blink > 0)
 		blink--;
 	else
-		blink = 2000;
+		blink = BLINK_PERIOD;
 
 	if (tempTimer > 0)
 		tempTimer--;
@@ -380,7 +381,7 @@ void segmTimeEditH(int8_t *time)
 
 	ind[0] = num[time[MIN] % 10];
 	ind[1] = num[time[MIN] / 10];
-	if (blink < 400) {
+	if (blink < BLINK_TIME) {
 		ind[2] = CH_EMPTY;
 		ind[3] = CH_EMPTY;
 	} else {
@@ -397,7 +398,7 @@ void segmTimeEditM(int8_t *time)
 	if (zeroHour)
 		chZeroHour = CH_0;
 
-	if (blink < 400) {
+	if (blink < BLINK_TIME) {
 		ind[0] = CH_EMPTY;
 		ind[1] = CH_EMPTY;
 	} else {
@@ -433,7 +434,7 @@ void segmFmEditFreq(void)
 	uint16_t freq;
 
 	freq = tunerGetFreq();
-	if (blink > 400) {
+	if (blink > BLINK_TIME) {
 		if ((freq >= 7600 && eeprom_read_byte(eepromFMStep2) >= 10) ||
 		    (freq < 7600 && eeprom_read_byte(eepromFMStep1) >= 10))
 			segmNum(freq/10, 1, CH_EMPTY, 0);
