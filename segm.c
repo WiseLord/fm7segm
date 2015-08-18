@@ -62,7 +62,11 @@ void segmInit(void)
 
 	TIMSK |= (1<<TOIE2);							/* Enable timer overflow interrupt */
 	TIMSK |= (1<<OCIE2);							/* Enable timer compare interrupt */
+#ifdef _NIXIE
+	TCCR2 |= (1<<CS22) | (0<<CS21) | (0<<CS20);		/* Set timer prescaller to 64 */
+#else
 	TCCR2 |= (0<<CS22) | (1<<CS21) | (0<<CS20);		/* Set timer prescaller to 8 */
+#endif
 	TCNT2 = 0;
 
 	encCnt = 0;
@@ -94,10 +98,12 @@ ISR (TIMER2_COMP_vect)
 	PORT(SEG_B) &= ~SEG_B_LINE;
 	PORT(SEG_C) &= ~SEG_C_LINE;
 	PORT(SEG_D) &= ~SEG_D_LINE;
+#ifndef _NIXIE
 	PORT(SEG_E) &= ~SEG_E_LINE;
 	PORT(SEG_F) &= ~SEG_F_LINE;
 	PORT(SEG_G) &= ~SEG_G_LINE;
 	PORT(SEG_P) &= ~SEG_P_LINE;
+#endif
 #else
 	PORT(SEG_A) |= SEG_A_LINE;
 	PORT(SEG_B) |= SEG_B_LINE;
@@ -124,6 +130,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		PORT(SEG_C) |= SEG_C_LINE;
 	if (dig & BIT_D)
 		PORT(SEG_D) |= SEG_D_LINE;
+#ifndef _NIXIE
 	if (dig & BIT_E)
 		PORT(SEG_E) |= SEG_E_LINE;
 	if (dig & BIT_F)
@@ -132,6 +139,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		PORT(SEG_G) |= SEG_G_LINE;
 	if (dig & BIT_P)
 		PORT(SEG_P) |= SEG_P_LINE;
+#endif
 #else
 	if (dig & BIT_A)
 		PORT(SEG_A) &= ~SEG_A_LINE;
@@ -189,6 +197,7 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 		pos = 0;
 
 	/* Handling buttons and encoder events */
+
 	static int16_t btnCnt = 0;
 
 	uint8_t encNow = ENC_0;
@@ -322,39 +331,51 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	return;
 }
 
-void segmNum(int16_t number, uint8_t dotPos, uint8_t label, uint8_t stInd)
+void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd)
 {
+#ifndef _NIXIE
 	uint8_t neg = 0;
+#endif
 	uint8_t i;
 
 	uint8_t buf[DIGITS];
 
 	for (i = 0; i < DIGITS; i++)
 		buf[i] = CH_EMPTY;
+#ifndef _NIXIE
 	if (stInd)
 		buf[0] = BIT_P;
+#endif
 
 	if (number < 0) {
+#ifndef _NIXIE
 		neg = 1;
+#endif
 		number = -number;
 	}
 
 	for (i = 0; i < DIGITS; i++) {
-		if (number == 0 && i > dotPos)
+		if (number == 0 && i > dot)
 			break;
-		buf[i] |= num[number % 10];
-		if (i == (dotPos % DIGITS) && i)
+		buf[i] = num[number % 10];
+#ifndef _NIXIE
+		if (i == (dot % DIGITS) && i)
 			buf[i] |= BIT_P;
+#endif
 		number /= 10;
 	}
 
+#ifndef _NIXIE
 	if (neg)
 		buf[i] |= BIT_G;
+#endif
+	if (buf[3] == CH_EMPTY)
+		buf[3] = label;
 
 	ind[0] = buf[0];
 	ind[1] = buf[1];
 	ind[2] = buf[2];
-	ind[3] = buf[3] | label;
+	ind[3] = buf[3];
 
 	return;
 }
@@ -367,7 +388,11 @@ void segmTimeHM(int8_t *time)
 
 	ind[0] = num[time[MIN] % 10];
 	ind[1] = num[time[MIN] / 10];
+#ifdef _NIXIE
+	ind[2] = num[time[HOUR] % 10];
+#else
 	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+#endif
 	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 
 	return;
@@ -385,7 +410,11 @@ void segmTimeEditH(int8_t *time)
 		ind[2] = CH_EMPTY;
 		ind[3] = CH_EMPTY;
 	} else {
+#ifdef _NIXIE
+		ind[2] = num[time[HOUR] % 10];
+#else
 		ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+#endif
 		ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 	}
 
@@ -405,7 +434,11 @@ void segmTimeEditM(int8_t *time)
 		ind[0] = num[time[MIN] % 10];
 		ind[1] = num[time[MIN] / 10];
 	}
+#ifdef _NIXIE
+	ind[2] = num[time[HOUR] % 10];
+#else
 	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+#endif
 	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 
 	return;
@@ -457,8 +490,13 @@ void segmFmNum(void)
 	if (num) {
 		segmNum(num, 0, CH_C, 0);
 	} else {
+#ifdef _NIXIE
+		ind[0] = CH_0;
+		ind[1] = CH_EMPTY;
+#else
 		ind[0] = BIT_G;
 		ind[1] = BIT_G;
+#endif
 		ind[2] = CH_EMPTY;
 		ind[3] = CH_C;
 	}
@@ -518,14 +556,14 @@ uint8_t getBtnCmd(void)
 	return ret;
 }
 
-void setDisplayTime(uint16_t value)
-{
-	displayTime = value << 2;
-}
-
 uint16_t getDisplayTime(void)
 {
-	return displayTime >> 2;
+	return displayTime * 2 / SCAN_FACTOR;
+}
+
+void setDisplayTime(uint16_t value)
+{
+	displayTime = value * SCAN_FACTOR / 2;
 }
 
 void setBrightness(uint8_t value)
@@ -540,10 +578,10 @@ void setBrightness(uint8_t value)
 
 uint16_t getTempTimer(void)
 {
-	return tempTimer >> 2;
+	return tempTimer * 2 / SCAN_FACTOR;
 }
 
 void setTempTimer(uint16_t val)
 {
-	tempTimer = val << 2;
+	tempTimer = val * SCAN_FACTOR / 2;
 }

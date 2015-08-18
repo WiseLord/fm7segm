@@ -3,6 +3,17 @@
 
 #include "pins.h"
 
+/* Nixie bin-dec decoder looks like common cathode indicator with transistors */
+#ifdef _NIXIE
+#undef _CA
+#ifndef _CC
+#define _CC
+#endif
+#ifndef _TR
+#define _TR
+#endif
+#endif
+
 /* _CC: Use indicators with common cathode by default */
 #if !defined(_CC) && !defined(_CA)
 #define _CC
@@ -26,6 +37,16 @@
 #define BIT_G		(1<<6)
 #define BIT_P		(1<<7)
 
+#ifdef _NIXIE
+#define CH_EMPTY	0xF
+enum {
+	CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9
+};
+
+#define CH_G		CH_9
+#define CH_C		CH_5
+#define CH_E		CH_3
+#else
 #define CH_EMPTY	0
 #define CH_0		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F)
 #define CH_1		(BIT_B | BIT_C)
@@ -41,6 +62,7 @@
 #define CH_G		(BIT_A | BIT_E | BIT_F)
 #define CH_C		(BIT_A | BIT_D | BIT_E | BIT_F)
 #define CH_E		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_G)
+#endif
 
 /* Display modes */
 enum {
@@ -92,11 +114,16 @@ enum {
 };
 
 /* Timings */
-#define SHORT_PRESS					400
-#define LONG_PRESS					1600
-#define AUTOREPEAT					600
-#define BLINK_PERIOD				2000
-#define BLINK_TIME					800
+#ifdef _NIXIE
+#define SCAN_FACTOR					1
+#else
+#define SCAN_FACTOR					8
+#endif
+#define SHORT_PRESS					SCAN_FACTOR * 50
+#define LONG_PRESS					SCAN_FACTOR * 200
+#define AUTOREPEAT					SCAN_FACTOR * 75
+#define BLINK_PERIOD				SCAN_FACTOR * 250
+#define BLINK_TIME					SCAN_FACTOR * 100
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
@@ -116,8 +143,8 @@ void segmTemp(void);
 int8_t getEncoder(void);
 uint8_t getBtnCmd(void);
 
-void setDisplayTime(uint16_t value);
 uint16_t getDisplayTime(void);
+void setDisplayTime(uint16_t value);
 
 void setBrightness(uint8_t value);
 

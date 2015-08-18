@@ -10,5 +10,7 @@ do
 			make PINOUT=${PINOUT} IND_TYPE=${IND_TYPE} USE_TRANS=${USE_TRANS}
 		done
 	done
+	make clean
+    make PINOUT=${PINOUT} IND_TYPE=_NIXIE
 done
 make clean

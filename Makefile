@@ -5,7 +5,11 @@ PINOUT = _PIN1
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
 
+ifeq ($(IND_TYPE), _NIXIE)
+TARG = fm7segm$(call lc,$(PINOUT))$(call lc,$(IND_TYPE))
+else
 TARG = fm7segm$(call lc,$(PINOUT))$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))
+endif
 
 MCU = atmega8
 F_CPU = 8000000
