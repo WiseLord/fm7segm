@@ -333,6 +333,18 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 
 void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd)
 {
+#ifdef _NIXIE
+	PORT(SEG_G) &= ~SEG_G_LINE;
+	if (dot == 1)
+		PORT(SEG_P) |= SEG_P_LINE;
+	else
+		PORT(SEG_P) &= ~SEG_P_LINE;
+	if (stInd)
+		PORT(SEG_F) |= SEG_F_LINE;
+	else
+		PORT(SEG_F) &= ~SEG_F_LINE;
+#endif
+
 #ifndef _NIXIE
 	uint8_t neg = 0;
 #endif
@@ -390,6 +402,9 @@ void segmTimeHM(int8_t *time)
 	ind[1] = num[time[MIN] / 10];
 #ifdef _NIXIE
 	ind[2] = num[time[HOUR] % 10];
+	(time[SEC] % 2) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
+	PORT(SEG_P) &= ~SEG_P_LINE;
+	PORT(SEG_F) &= ~SEG_F_LINE;
 #else
 	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
 #endif
@@ -412,6 +427,9 @@ void segmTimeEditH(int8_t *time)
 	} else {
 #ifdef _NIXIE
 		ind[2] = num[time[HOUR] % 10];
+		(time[SEC] % 2) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
+		PORT(SEG_P) &= ~SEG_P_LINE;
+		PORT(SEG_F) &= ~SEG_F_LINE;
 #else
 		ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
 #endif
@@ -436,6 +454,9 @@ void segmTimeEditM(int8_t *time)
 	}
 #ifdef _NIXIE
 	ind[2] = num[time[HOUR] % 10];
+	(time[SEC] % 2) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
+	PORT(SEG_P) &= ~SEG_P_LINE;
+	PORT(SEG_F) &= ~SEG_F_LINE;
 #else
 	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
 #endif
