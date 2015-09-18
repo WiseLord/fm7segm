@@ -579,12 +579,12 @@ uint8_t getBtnCmd(void)
 
 uint16_t getDisplayTime(void)
 {
-	return displayTime * 2 / SCAN_FACTOR;
+	return displayTime / SCAN_FACTOR * 2;
 }
 
 void setDisplayTime(uint16_t value)
 {
-	displayTime = value * SCAN_FACTOR / 2;
+	displayTime = value / 2 * SCAN_FACTOR;
 }
 
 void setBrightness(uint8_t value)
