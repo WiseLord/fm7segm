@@ -79,6 +79,7 @@ enum {
 	MODE_STANDBY
 };
 
+/* Display timings in msec */
 #define DISPLAY_TIME_VOLUME			2000
 #define DISPLAY_TIME_FM_FREQ		3000
 #define DISPLAY_TIME_FM_CHAN		1000
@@ -89,6 +90,7 @@ enum {
 #define DISPLAY_TIME_EDITTIME		10000
 #define DISPLAY_TIME_BRIGHTNESS		2000
 
+/* Encoder and buttons status bits */
 #define ENC_0						0b000000
 #define ENC_A						0b000001
 #define ENC_B						0b000010
@@ -121,7 +123,7 @@ enum {
 #endif
 #define SHORT_PRESS					SCAN_FACTOR * 50
 #define LONG_PRESS					SCAN_FACTOR * 200
-#define AUTOREPEAT					SCAN_FACTOR * 75
+#define AUTOREPEAT					SCAN_FACTOR * 150
 #define BLINK_PERIOD				SCAN_FACTOR * 250
 #define BLINK_TIME					SCAN_FACTOR * 100
 
