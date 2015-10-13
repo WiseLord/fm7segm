@@ -63,7 +63,7 @@ size:
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -D$(PINOUT) -c -o $@ $<
 
 .PHONY: clean
 clean:
