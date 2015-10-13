@@ -5,61 +5,79 @@ PINOUT = _PIN1
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
 
+# Output file name
 ifeq ($(IND_TYPE), _NIXIE)
 TARG = fm7segm$(call lc,$(PINOUT))$(call lc,$(IND_TYPE))
 else
 TARG = fm7segm$(call lc,$(PINOUT))$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))
 endif
 
-MCU = atmega8
-F_CPU = 8000000
+# MCU name and frequency
+MCU      = atmega8
+F_CPU    = 8000000
 
 # Source files
-
 TUNER_SRC = $(wildcard tuner/*.c)
+SRCS     = $(wildcard *.c) $(TUNER_SRC)
 
-SRCS = $(wildcard *.c) $(TUNER_SRC)
+# Build directory
+BUILDDIR = build
 
+# Compiler options
 OPTIMIZE = -Os -mcall-prologues -fshort-enums -ffunction-sections -fdata-sections
-DEBUG = -g -Wall -Werror
-CFLAGS = $(DEBUG) -lm $(OPTIMIZE) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
-LDFLAGS = $(DEBUG) -mmcu=$(MCU) -Wl,-gc-sections
+DEBUG    = -g -Wall -Werror
+DEPS     = -MMD -MP -MT $(BUILDDIR)/$(*F).o -MF $(BUILDDIR)/$(*D)/$(*F).d
+CFLAGS   = $(DEBUG) -lm $(OPTIMIZE) $(DEPS) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
+LDFLAGS  = $(DEBUG) -mmcu=$(MCU) -Wl,-gc-sections -mrelax
 
-CC = avr-gcc
-OBJCOPY = avr-objcopy
+# AVR toolchain and flasher
+CC       = avr-gcc
+OBJCOPY  = avr-objcopy
+OBJDUMP  = avr-objdump
 
-AVRDUDE = avrdude
-AD_MCU = -p $(MCU)
+# AVRDude parameters
+AVRDUDE  = avrdude
+AD_MCU   = -p $(MCU)
 #AD_PROG = -c stk500v2
 #AD_PORT = -P avrdoper
 
-AD_CMDLINE = $(AD_MCU) $(AD_PROG) $(AD_PORT) -V
+AD_CMD   = $(AD_MCU) $(AD_PROG) $(AD_PORT) -V
 
-OBJDIR = obj
-OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.c=.o))
-ELF = $(OBJDIR)/$(TARG).elf
+# Build objects
+OBJS     = $(addprefix $(BUILDDIR)/, $(SRCS:.c=.o))
+ELF      = $(BUILDDIR)/$(TARG).elf
 
-all: $(TARG)
+# Dependencies
+-include $(OBJS:.o=.d)
 
-$(TARG): $(OBJS)
+all: $(ELF) size
+
+$(ELF): $(OBJS)
+	@mkdir -p $(BUILDDIR) flash
 	$(CC) $(LDFLAGS) -o $(ELF) $(OBJS) -lm
-	mkdir -p flash
-	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) flash/$@.hex
-	./size.sh $(ELF)
+	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) flash/$(TARG).hex
+	$(OBJDUMP) -h -S $(ELF) > $(BUILDDIR)/$(TARG).lss
 
-obj/%.o: %.c
-	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -D$(PINOUT) -c -o $@ $<
+size:
+	@sh ./size.sh $(ELF)
 
+$(BUILDDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+.PHONY: clean
 clean:
-	rm -rf $(OBJDIR)
+	rm -rf $(BUILDDIR)
 
-flash: $(TARG)
-	$(AVRDUDE) $(AD_CMDLINE) -U flash:w:flash/$(TARG).hex:i
+.PHONY: flash
+flash: $(ELF)
+	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm.bin:r
 
-eeprom:
-	$(AVRDUDE) -p $(MCU) -U eeprom:w:fm7segm.bin:r
+.PHONY: eeprom
+eeprom: $(ELF)
+	$(AVRDUDE) $(AD_CMD) -U flash:w:flash/$(TARG).hex:i
 
+.PHONY: fuse
 fuse:
-	$(AVRDUDE) -p $(MCU) -U lfuse:w:0x24:m -U hfuse:w:0xc1:m
+	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0x24:m -U hfuse:w:0xC1:m
 
