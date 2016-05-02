@@ -192,8 +192,8 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	}
 #endif
 
-	/* Co to next digit */
-	if (++pos > 3)
+	/* Go to next digit */
+	if (++pos >= DIGITS)
 		pos = 0;
 
 	/* Handling buttons and encoder events */
