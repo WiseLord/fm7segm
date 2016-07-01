@@ -73,9 +73,13 @@ clean:
 flash: $(ELF)
 	$(AVRDUDE) $(AD_CMD) -U flash:w:flash/$(TARG).hex:i
 
-.PHONY: eeprom
-eeprom:
-	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm.bin:r
+.PHONY: eeprom_rda5807
+eeprom_rda5807:
+	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm_rda5807.bin:r
+
+.PHONY: eeprom_tea5767
+eeprom_tea5767:
+	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm_tea5767.bin:r
 
 .PHONY: fuse
 fuse:
