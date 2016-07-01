@@ -1,6 +1,6 @@
 #!/bin/sh
 
-for PINOUT in _PIN1 _PIN2
+for PINOUT in _PIN1 _PIN2 _PIN3
 do
 	for IND_TYPE in _CA _CC
 	do
