@@ -71,13 +71,12 @@ clean:
 
 .PHONY: flash
 flash: $(ELF)
-	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm.bin:r
+	$(AVRDUDE) $(AD_CMD) -U flash:w:flash/$(TARG).hex:i
 
 .PHONY: eeprom
-eeprom: $(ELF)
-	$(AVRDUDE) $(AD_CMD) -U flash:w:flash/$(TARG).hex:i
+eeprom:
+	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm.bin:r
 
 .PHONY: fuse
 fuse:
 	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0x24:m -U hfuse:w:0xC1:m
-
