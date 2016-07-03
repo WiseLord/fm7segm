@@ -65,13 +65,13 @@ void muteVolume(void)
 {
 	tunerSetMute(1);
 
-	if (tunerGetType() == TUNER_RDA5807 ||
-	    tunerGetType() == TUNER_RDA5802) {
-		PORT(VOLUME) |= VOLUME_LINE;					/* Pull amplifier input to ground */
-	} else {
+	tunerIC tuner = tunerGetType();
+
+	if (tuner != TUNER_RDA5807 && tuner != TUNER_RDA5802)
 		TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
-		PORT(VOLUME) &= ~VOLUME_LINE;
-	}
+
+	DDR(VOLUME) |= VOLUME_LINE;							/* Set as output */
+	PORT(VOLUME) &= ~VOLUME_LINE;						/* Pull amplifier input to ground */
 
 	return;
 }
@@ -82,8 +82,10 @@ void unmuteVolume(void)
 
 	if (tunerGetType() == TUNER_RDA5807 ||
 	    tunerGetType() == TUNER_RDA5802) {
-		PORT(VOLUME) &= ~VOLUME_LINE;					/* Release amplifier input */
+		DDR(VOLUME) &= ~VOLUME_LINE;					/* Set as input */
+		PORT(VOLUME) |= VOLUME_LINE;					/* Add pullup resistor */
 	} else {
+		DDR(VOLUME) |= VOLUME_LINE;						/* Set as output */
 		TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
 	}
 
