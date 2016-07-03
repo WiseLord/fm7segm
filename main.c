@@ -25,6 +25,7 @@ static void segmBr(void)
 /* Handle leaving standby mode */
 static void powerOn(void)
 {
+	tunerPowerOn();
 	unmuteVolume();
 	setVolume(getVolume());
 	setBrightness(brWork);
@@ -41,6 +42,7 @@ static void powerOff(void)
 
 	muteVolume();
 	volumeSaveParams();
+	tunerPowerOff();
 
 	eeprom_update_byte(eepromDispMode, defDispMode);
 	eeprom_update_byte(eepromBrWork, brWork);

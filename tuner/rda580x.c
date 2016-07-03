@@ -115,7 +115,7 @@ void rda580xPowerOn(void)
 {
 	wrBuf[1] |= RDA5807_ENABLE;
 
-	rda580xSetMute(0);
+	rda580xSetMute(1);
 
 	return;
 }

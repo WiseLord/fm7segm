@@ -113,7 +113,7 @@ void tea5767PowerOn(void)
 {
 	wrBuf[3] &= ~TEA5767_STBY;
 
-	tea5767SetMute(0);
+	tea5767SetMute(1);
 
 	return;
 }
