@@ -32,7 +32,8 @@ typedef struct {
 void ds18x20SearchDevices(void);
 uint8_t getDevCount(void);
 
-uint8_t ds18x20Process(void);
+void ds18x20GetAllTemps();
+void ds18x20Process(void);
 int16_t ds18x20GetTemp(uint8_t num);
 ds18x20Dev ds18x20GetDev(uint8_t num);
 

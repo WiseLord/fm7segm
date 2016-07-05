@@ -22,11 +22,11 @@ static volatile uint8_t cmdBuf;
 static volatile uint8_t encPrev = ENC_0;
 static volatile uint8_t btnPrev = BTN_STATE_0;
 
-static volatile uint16_t displayTime;
-static volatile uint16_t blink;
+static volatile uint16_t displayTime = 0;
+static volatile uint16_t blink = 0;
 
-static volatile uint16_t tempTimer;
-static volatile uint16_t rtcTimer;
+static volatile uint16_t tempTimer = 0;
+static volatile uint16_t rtcTimer = 0;
 
 void segmInit(void)
 {
@@ -544,7 +544,7 @@ void segmTemp(void)
 
 void segmTimeOrTemp()
 {
-	if (getDevCount() && (time[SEC] % 15 <= 2)) {
+	if (getDevCount() && (time[SEC] % 15 < 2)) {
 		segmTemp();
 	} else {
 		segmTimeHM();

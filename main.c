@@ -56,8 +56,10 @@ void hwInit(void)
 {
 	_delay_ms(100);
 
-	/* Attempt to find temperature sensors */
+	/* Attempt to find temperature sensors and make first measurement */
 	ds18x20SearchDevices();
+	if (getDevCount())
+		ds18x20Process();
 
 	sei();
 
@@ -96,11 +98,17 @@ int main(void)
 			setRtcTimer(RTC_POLL_TIME);
 		}
 
-		/* If temperature sensor has not still found, continue searching */
-		if (!getDevCount())
+		if (getDevCount()) {
+			// Get all temperatures
+			if (getTempTimer() == 0)
+				ds18x20GetAllTemps();
+			// Run measurement 4 times per minute
+			if (time[SEC] % 15 == 14)
+				ds18x20Process();
+		} else {
+			// Continue searching devices
 			ds18x20SearchDevices();
-		else
-			ds18x20Process();
+		}
 
 		/* Don't handle commands in standby mode except STBY */
 		if (dispMode == MODE_STANDBY) {
@@ -152,6 +160,7 @@ int main(void)
 			} else {
 				if (dispMode == MODE_TIME) {
 					if (getDevCount()) {
+						ds18x20Process();
 						dispMode = MODE_TEMP;
 						setDisplayTime(DISPLAY_TIME_TEMP);
 					} else {

@@ -7,8 +7,6 @@
 static ds18x20Dev devs[DS18X20_MAX_DEV];
 static uint8_t devCount = 0;
 
-static uint8_t isResult = 0;							/* It conversion has been done */
-
 static uint8_t calcCRC8 (uint8_t *arr, uint8_t arr_size)
 {
 	uint8_t bit, byte;
@@ -115,30 +113,6 @@ static void ds18x20Select(ds18x20Dev *dev)
 	return;
 }
 
-static void getAllTemps()
-{
-	uint8_t i, j;
-
-	uint8_t arr[9];
-
-	for (i = 0; i < devCount; i++) {
-		if (ds18x20IsOnBus()) {
-			ds18x20Select(&devs[i]);
-			ds18x20SendByte(DS18X20_CMD_READ_SCRATCH);
-
-			for (j = 0; j < 9; j++)
-				arr[j] = ds18x20GetByte();
-
-			if (!calcCRC8(arr, sizeof(arr))) {
-				for (j = 0; j < 9; j++)
-					devs[i].sp[j] = arr[j];
-			}
-		}
-	}
-
-	return;
-}
-
 static void convertTemp(void)
 {
 	ds18x20SendByte(DS18X20_CMD_SKIP_ROM);
@@ -151,8 +125,6 @@ static void convertTemp(void)
 #endif
 
 	setTempTimer(TEMP_MEASURE_TIME);
-
-	isResult = 1;
 
 	return;
 }
@@ -254,19 +226,40 @@ uint8_t getDevCount(void)
 	return devCount;
 }
 
-uint8_t ds18x20Process(void)
+void ds18x20GetAllTemps()
+{
+	uint8_t i, j;
+
+	uint8_t arr[9];
+
+	for (i = 0; i < devCount; i++) {
+		if (ds18x20IsOnBus()) {
+			ds18x20Select(&devs[i]);
+			ds18x20SendByte(DS18X20_CMD_READ_SCRATCH);
+
+			for (j = 0; j < 9; j++)
+				arr[j] = ds18x20GetByte();
+
+			if (!calcCRC8(arr, sizeof(arr))) {
+				for (j = 0; j < 9; j++)
+					devs[i].sp[j] = arr[j];
+			}
+		}
+	}
+
+	return;
+}
+
+void ds18x20Process(void)
 {
 	if (getTempTimer() == 0) {
-
-		if (isResult)
-			getAllTemps();
 
 		/* Convert temperature */
 		if (ds18x20IsOnBus())
 			convertTemp();
 	}
 
-	return devCount;
+	return;
 }
 
 int16_t ds18x20GetTemp(uint8_t num)
