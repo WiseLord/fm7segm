@@ -93,6 +93,7 @@ enum {
 /* Other timers */
 #define TEMP_MEASURE_TIME			750
 #define RTC_POLL_TIME				1000
+#define FM_STATUS_TIME				200
 
 /* Encoder and buttons status bits */
 #define ENC_0						0b000000
@@ -161,5 +162,8 @@ void setTempTimer(uint16_t val);
 
 uint16_t getRtcTimer(void);
 void setRtcTimer(uint16_t val);
+
+uint16_t getFmStatusTimer(void);
+void setFmStatusTimer(uint16_t val);
 
 #endif // SEGM_H

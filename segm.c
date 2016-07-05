@@ -27,6 +27,7 @@ static volatile uint16_t blink = 0;
 
 static volatile uint16_t tempTimer = 0;
 static volatile uint16_t rtcTimer = 0;
+static volatile uint16_t fmStatusTimer = 0;
 
 void segmInit(void)
 {
@@ -332,6 +333,9 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	if (rtcTimer > 0)
 		rtcTimer--;
 
+	if (fmStatusTimer > 0)
+		fmStatusTimer--;
+
 	return;
 }
 
@@ -473,7 +477,11 @@ void segmFmFreq(void)
 {
 	uint16_t freq;
 
-	tunerReadStatus();
+	if (getFmStatusTimer() == 0) {
+		tunerReadStatus();
+		setFmStatusTimer(FM_STATUS_TIME);
+	}
+
 	freq = tunerGetFreq();
 	if (freq >= 10000) {
 		segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
@@ -631,4 +639,14 @@ uint16_t getRtcTimer()
 void setRtcTimer(uint16_t val)
 {
 	rtcTimer = val * SCAN_FACTOR / 2;
+}
+
+uint16_t getFmStatusTimer()
+{
+	return fmStatusTimer * 2 / SCAN_FACTOR;
+}
+
+void setFmStatusTimer(uint16_t val)
+{
+	fmStatusTimer = val * SCAN_FACTOR / 2;
 }
