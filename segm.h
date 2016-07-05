@@ -135,9 +135,9 @@ void segmInit(void);
 void segmBrightness(uint8_t value);
 void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd);
 
-void segmTimeHM(int8_t *time);
-void segmTimeEditH(int8_t *time);
-void segmTimeEditM(int8_t *time);
+void segmTimeHM(void);
+void segmTimeEditH(void);
+void segmTimeEditM(void);
 
 void segmFmFreq(void);
 void segmFmEditFreq(void);
@@ -145,6 +145,8 @@ void segmFmNum(void);
 
 void segmVol(void);
 void segmTemp(void);
+
+void segmTimeOrTemp(void);
 
 int8_t getEncoder(void);
 uint8_t getBtnCmd(void);

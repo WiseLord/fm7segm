@@ -2,7 +2,9 @@
 
 #include "i2c.h"
 
-static int8_t time[7];
+// Global variable for accessing time
+int8_t time[7];
+
 static timeMode _etm = NOEDIT;
 
 static void calcWeekDay(void)
@@ -71,11 +73,6 @@ void ds1307Init(void)
 	}
 
 	return;
-}
-
-int8_t getTime(timeMode tm)
-{
-	return time[tm];
 }
 
 timeMode getEtm()

@@ -13,7 +13,6 @@
 
 static uint8_t defDispMode = MODE_TIME;
 static int8_t brWork, brStby;
-static uint8_t dsCnt = 0;
 
 static void segmBr(void)
 {
@@ -55,17 +54,12 @@ static void powerOff(void)
 
 void hwInit(void)
 {
-	uint8_t i;
-
 	_delay_ms(100);
 
+	/* Attempt to find temperature sensors */
+	ds18x20SearchDevices();
+
 	sei();
-	/* 5 attempts to find temperature sensors */
-	for (i = 0; i < 5 && !dsCnt; i++) {
-		_delay_ms(1);
-		ds18x20SearchDevices();
-		dsCnt = getDevCount();
-	}
 
 	segmInit();							/* Indicator */
 	I2CInit();							/* I2C bus */
@@ -90,7 +84,6 @@ int main(void)
 	int8_t encCnt = 0;
 	uint8_t cmd = CMD_EMPTY;
 
-	int8_t *time = readTime();
 	setRtcTimer(RTC_POLL_TIME);
 
 	while (1) {
@@ -104,12 +97,10 @@ int main(void)
 		}
 
 		/* If temperature sensor has not still found, continue searching */
-		if (!dsCnt) {
+		if (!getDevCount())
 			ds18x20SearchDevices();
-			dsCnt = getDevCount();
-		} else {
+		else
 			ds18x20Process();
-		}
 
 		/* Don't handle commands in standby mode except STBY */
 		if (dispMode == MODE_STANDBY) {
@@ -160,7 +151,7 @@ int main(void)
 				}
 			} else {
 				if (dispMode == MODE_TIME) {
-					if (dsCnt) {
+					if (getDevCount()) {
 						dispMode = MODE_TEMP;
 						setDisplayTime(DISPLAY_TIME_TEMP);
 					} else {
@@ -170,7 +161,7 @@ int main(void)
 					}
 				} else {
 					dispMode = MODE_TIME;
-					if (!dsCnt)
+					if (!getDevCount())
 						defDispMode = MODE_TIME;
 					setDisplayTime(DISPLAY_TIME_TIME);
 				}
@@ -355,11 +346,8 @@ int main(void)
 		/* Show things */
 		switch (dispMode) {
 		case MODE_STANDBY:
-			if (dsCnt && (time[SEC] % 15 <= 2)) { /* Every 20 sec for 2 sec*/
-				segmTemp();
-			} else {
-				segmTimeHM(time);
-			}
+		case MODE_TIME:
+			segmTimeOrTemp();
 			break;
 		case MODE_TEMP:
 			segmTemp();
@@ -374,18 +362,11 @@ int main(void)
 		case MODE_FMTUNE_FREQ:
 			segmFmEditFreq();
 			break;
-		case MODE_TIME:
-			if (dsCnt && (time[SEC] % 15 <= 2) && !getDisplayTime()) {
-				segmTemp();
-			} else {
-				segmTimeHM(time);
-			}
-			break;
 		case MODE_TIME_EDIT_H:
-			segmTimeEditH(time);
+			segmTimeEditH();
 			break;
 		case MODE_TIME_EDIT_M:
-			segmTimeEditM(time);
+			segmTimeEditM();
 			break;
 		case MODE_BRIGHTNESS:
 			segmBr();

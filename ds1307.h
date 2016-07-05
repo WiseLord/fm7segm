@@ -8,6 +8,9 @@
 #define BD2D(x)			((x >> 4) * 10 + (x & 0x0F))
 #define D2BD(x)			(((x / 10) << 4) + (x % 10))
 
+// Global variable for accessing time
+extern int8_t time[7];
+
 typedef enum {
 	SEC   = 0,
 	MIN   = 1,
@@ -21,7 +24,6 @@ typedef enum {
 
 void ds1307Init(void);
 
-int8_t getTime(timeMode tm);
 timeMode getEtm();
 
 int8_t *readTime(void);

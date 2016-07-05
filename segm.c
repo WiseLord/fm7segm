@@ -396,7 +396,7 @@ void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd)
 	return;
 }
 
-void segmTimeHM(int8_t *time)
+void segmTimeHM(void)
 {
 	uint8_t chZeroHour = CH_EMPTY;
 	if (zeroHour)
@@ -417,7 +417,7 @@ void segmTimeHM(int8_t *time)
 	return;
 }
 
-void segmTimeEditH(int8_t *time)
+void segmTimeEditH(void)
 {
 	uint8_t chZeroHour = CH_EMPTY;
 	if (zeroHour)
@@ -443,7 +443,7 @@ void segmTimeEditH(int8_t *time)
 	return;
 }
 
-void segmTimeEditM(int8_t *time)
+void segmTimeEditM(void)
 {
 	uint8_t chZeroHour = CH_EMPTY;
 	if (zeroHour)
@@ -541,6 +541,18 @@ void segmTemp(void)
 
 	return;
 }
+
+void segmTimeOrTemp()
+{
+	if (getDevCount() && (time[SEC] % 15 <= 2)) {
+		segmTemp();
+	} else {
+		segmTimeHM();
+	}
+
+	return;
+}
+
 
 int8_t getEncoder(void)
 {
