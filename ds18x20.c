@@ -150,7 +150,7 @@ static void convertTemp(void)
 	DS18X20_DDR |= DS18X20_WIRE;
 #endif
 
-	setTempTimer(750);
+	setTempTimer(TEMP_MEASURE_TIME);
 
 	isResult = 1;
 

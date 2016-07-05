@@ -26,6 +26,7 @@ static volatile uint16_t displayTime;
 static volatile uint16_t blink;
 
 static volatile uint16_t tempTimer;
+static volatile uint16_t rtcTimer;
 
 void segmInit(void)
 {
@@ -328,6 +329,9 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	if (tempTimer > 0)
 		tempTimer--;
 
+	if (rtcTimer > 0)
+		rtcTimer--;
+
 	return;
 }
 
@@ -402,11 +406,11 @@ void segmTimeHM(int8_t *time)
 	ind[1] = num[time[MIN] / 10];
 #ifdef _NIXIE
 	ind[2] = num[time[HOUR] % 10];
-	(time[SEC] % 2) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
+	(rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4)) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
 	PORT(SEG_P) &= ~SEG_P_LINE;
 	PORT(SEG_F) &= ~SEG_F_LINE;
 #else
-	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+	ind[2] = num[time[HOUR] % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
 #endif
 	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 
@@ -427,11 +431,11 @@ void segmTimeEditH(int8_t *time)
 	} else {
 #ifdef _NIXIE
 		ind[2] = num[time[HOUR] % 10];
-		(time[SEC] % 2) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
+		(rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4)) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
 		PORT(SEG_P) &= ~SEG_P_LINE;
 		PORT(SEG_F) &= ~SEG_F_LINE;
 #else
-		ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+		ind[2] = num[time[HOUR] % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
 #endif
 		ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 	}
@@ -454,11 +458,11 @@ void segmTimeEditM(int8_t *time)
 	}
 #ifdef _NIXIE
 	ind[2] = num[time[HOUR] % 10];
-	(time[SEC] % 2) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
+	(rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4)) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
 	PORT(SEG_P) &= ~SEG_P_LINE;
 	PORT(SEG_F) &= ~SEG_F_LINE;
 #else
-	ind[2] = num[time[HOUR] % 10] | (time[SEC] % 2 ? BIT_P : CH_EMPTY);
+	ind[2] = num[time[HOUR] % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
 #endif
 	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 
@@ -605,4 +609,14 @@ uint16_t getTempTimer(void)
 void setTempTimer(uint16_t val)
 {
 	tempTimer = val * SCAN_FACTOR / 2;
+}
+
+uint16_t getRtcTimer()
+{
+	return rtcTimer * 2 / SCAN_FACTOR;
+}
+
+void setRtcTimer(uint16_t val)
+{
+	rtcTimer = val * SCAN_FACTOR / 2;
 }

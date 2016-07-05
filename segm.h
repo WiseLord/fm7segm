@@ -90,6 +90,10 @@ enum {
 #define DISPLAY_TIME_EDITTIME		10000
 #define DISPLAY_TIME_BRIGHTNESS		2000
 
+/* Other timers */
+#define TEMP_MEASURE_TIME			750
+#define RTC_POLL_TIME				1000
+
 /* Encoder and buttons status bits */
 #define ENC_0						0b000000
 #define ENC_A						0b000001
@@ -152,5 +156,8 @@ void setBrightness(uint8_t value);
 
 uint16_t getTempTimer(void);
 void setTempTimer(uint16_t val);
+
+uint16_t getRtcTimer(void);
+void setRtcTimer(uint16_t val);
 
 #endif // SEGM_H

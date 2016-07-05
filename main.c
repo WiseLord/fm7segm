@@ -89,12 +89,20 @@ int main(void)
 	uint8_t editFM = 0;
 	int8_t encCnt = 0;
 	uint8_t cmd = CMD_EMPTY;
-	int8_t *time;
+
+	int8_t *time = readTime();
+	setRtcTimer(RTC_POLL_TIME);
 
 	while (1) {
 		encCnt = getEncoder();
 		cmd = getBtnCmd();
-		time = readTime();
+
+		/* Poll RTC for time */
+		if (getRtcTimer() == 0) {
+			readTime();
+			setRtcTimer(RTC_POLL_TIME);
+		}
+
 		/* If temperature sensor has not still found, continue searching */
 		if (!dsCnt) {
 			ds18x20SearchDevices();
@@ -347,7 +355,7 @@ int main(void)
 		/* Show things */
 		switch (dispMode) {
 		case MODE_STANDBY:
-			if (dsCnt && (time[SEC] % 15 >= 13)) { /* Every 20 sec for 2 sec*/
+			if (dsCnt && (time[SEC] % 15 <= 2)) { /* Every 20 sec for 2 sec*/
 				segmTemp();
 			} else {
 				segmTimeHM(time);
@@ -367,7 +375,7 @@ int main(void)
 			segmFmEditFreq();
 			break;
 		case MODE_TIME:
-			if (dsCnt && (time[SEC] % 15 >= 13) && !getDisplayTime()) {
+			if (dsCnt && (time[SEC] % 15 <= 2) && !getDisplayTime()) {
 				segmTemp();
 			} else {
 				segmTimeHM(time);
