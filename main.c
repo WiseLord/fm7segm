@@ -43,11 +43,11 @@ static void powerOff(void)
 	volumeSaveParams();
 	tunerPowerOff();
 
-	eeprom_update_byte(eepromDispMode, defDispMode);
-	eeprom_update_byte(eepromBrWork, brWork);
+	eeprom_update_byte((uint8_t*)EEPROM_DISPLAY, defDispMode);
+	eeprom_update_byte((uint8_t*)EEPROM_BR_WORK, brWork);
 
-	eeprom_update_word(eepromFMFreq, tunerGetFreq());
-	eeprom_update_byte(eepromFMMono, tunerGetMono());
+	eeprom_update_word((uint16_t*)EEPROM_FM_FREQ, tunerGetFreq());
+	eeprom_update_byte((uint8_t*)EEPROM_FM_MONO, tunerGetMono());
 
 	return;
 }
@@ -69,9 +69,9 @@ void hwInit(void)
 	tunerInit();
 	volumeInit();
 
-	defDispMode = eeprom_read_byte(eepromDispMode);
-	brWork = eeprom_read_byte(eepromBrWork);
-	brStby = eeprom_read_byte(eepromBrStby);
+	defDispMode = eeprom_read_byte((uint8_t*)EEPROM_DISPLAY);
+	brWork = eeprom_read_byte((uint8_t*)EEPROM_BR_WORK);
+	brStby = eeprom_read_byte((uint8_t*)EEPROM_BR_STBY);
 	powerOff();
 
 	return;

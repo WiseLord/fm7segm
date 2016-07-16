@@ -17,7 +17,7 @@ void volumeInit(void)
 	DDR(VOLUME) |= VOLUME_LINE;
 	TCCR0 |= (0<<CS02) | (0<<CS01) | (1<<CS00);		/* Set timer prescaller to 1 for PWM */
 
-	setVolume(eeprom_read_byte(eepromVolume));
+	setVolume(eeprom_read_byte(EEPROM_VOLUME));
 
 	muteVolume();
 
@@ -92,7 +92,7 @@ void unmuteVolume(void)
 
 void volumeSaveParams(void)
 {
-	eeprom_update_byte(eepromVolume, vol);
+	eeprom_update_byte(EEPROM_VOLUME, vol);
 
 	return;
 }

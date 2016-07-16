@@ -14,14 +14,14 @@ void tunerInit(void)
 {
 	uint8_t ctrl;
 
-	ctrl = eeprom_read_byte(eepromFMCtrl);
-	_tuner = eeprom_read_byte(eepromFMTuner);
-	_freq = eeprom_read_word(eepromFMFreq);
-	_fMin = eeprom_read_word(eepromFMFreqMin);
-	_fMax = eeprom_read_word(eepromFMFreqMax);
-	_mono = eeprom_read_byte(eepromFMMono);
-	_step1 = eeprom_read_byte(eepromFMStep1);
-	_step2 = eeprom_read_byte(eepromFMStep2);
+	ctrl = eeprom_read_byte((uint8_t*)EEPROM_FM_CTRL);
+	_tuner = eeprom_read_byte((uint8_t*)EEPROM_FM_TUNER);
+	_freq = eeprom_read_word((uint16_t*)EEPROM_FM_FREQ);
+	_fMin = eeprom_read_word((uint16_t*)EEPROM_FM_FREQ_MIN);
+	_fMax = eeprom_read_word((uint16_t*)EEPROM_FM_FREQ_MAX);
+	_mono = eeprom_read_byte((uint8_t*)EEPROM_FM_MONO);
+	_step1 = eeprom_read_byte((uint8_t*)EEPROM_FM_STEP1);
+	_step2 = eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2);
 
 	if (_tuner >= TUNER_END)
 		_tuner = TUNER_TEA5767;
@@ -203,7 +203,7 @@ uint8_t tunerStationNum(void)
 	uint8_t i;
 
 	for (i = 0; i < FM_COUNT; i++)
-		if (eeprom_read_word(eepromStations + i) == _freq)
+		if (eeprom_read_word((uint16_t*)EEPROM_STATIONS + i) == _freq)
 			return i + 1;
 
 	return 0;
@@ -215,7 +215,7 @@ uint8_t tunerFavStationNum(void)
 	uint8_t i;
 
 	for (i = 0; i < FM_COUNT; i++)
-		if (eeprom_read_word(eepromFavStations + i) == _freq)
+		if (eeprom_read_word((uint16_t*)EEPROM_FAV_STATIONS + i) == _freq)
 			return i + 1;
 
 	return 0;
@@ -229,7 +229,7 @@ void tunerNextStation(int8_t direction)
 	uint16_t freqFound = _freq;
 
 	for (i = 0; i < FM_COUNT; i++) {
-		freqCell = eeprom_read_word(eepromStations + i);
+		freqCell = eeprom_read_word((uint16_t*)EEPROM_STATIONS + i);
 		if (freqCell != 0xFFFF) {
 			if (direction == SEARCH_UP) {
 				if (freqCell > _freq) {
@@ -254,7 +254,7 @@ void tunerNextStation(int8_t direction)
 /* Load station by number */
 void tunerLoadStation(uint8_t num)
 {
-	uint16_t freqCell = eeprom_read_word(eepromStations + num);
+	uint16_t freqCell = eeprom_read_word((uint16_t*)EEPROM_STATIONS + num);
 
 	if (freqCell != 0xFFFF)
 		tunerSetFreq(freqCell);
@@ -265,8 +265,8 @@ void tunerLoadStation(uint8_t num)
 /* Load favourite station by number */
 void tunerLoadFavStation(uint8_t num)
 {
-	if (eeprom_read_word(eepromFavStations + num) != 0)
-		tunerSetFreq(eeprom_read_word(eepromFavStations + num));
+	if (eeprom_read_word((uint16_t*)EEPROM_FAV_STATIONS + num) != 0)
+		tunerSetFreq(eeprom_read_word((uint16_t*)EEPROM_FAV_STATIONS + num));
 
 	return;
 }
@@ -274,10 +274,10 @@ void tunerLoadFavStation(uint8_t num)
 /* Load favourite station by number */
 void tunerStoreFavStation(uint8_t num)
 {
-	if (eeprom_read_word(eepromFavStations + num) == _freq)
-		eeprom_update_word(eepromFavStations + num, 0);
+	if (eeprom_read_word((uint16_t*)EEPROM_FAV_STATIONS + num) == _freq)
+		eeprom_update_word((uint16_t*)EEPROM_FAV_STATIONS + num, 0);
 	else
-		eeprom_update_word(eepromFavStations + num, _freq);
+		eeprom_update_word((uint16_t*)EEPROM_FAV_STATIONS + num, _freq);
 
 	return;
 }
@@ -292,7 +292,7 @@ void tunerStoreStation(void)
 	freq = _freq;
 
 	for (i = 0; i < FM_COUNT; i++) {
-		freqCell = eeprom_read_word(eepromStations + i);
+		freqCell = eeprom_read_word((uint16_t*)EEPROM_STATIONS + i);
 		if (freqCell < freq)
 			continue;
 		if (freqCell == freq) {
@@ -300,14 +300,14 @@ void tunerStoreStation(void)
 				if (j == FM_COUNT - 1)
 					freqCell = 0xFFFF;
 				else
-					freqCell = eeprom_read_word(eepromStations + j + 1);
-				eeprom_update_word(eepromStations + j, freqCell);
+					freqCell = eeprom_read_word((uint16_t*)EEPROM_STATIONS + j + 1);
+				eeprom_update_word((uint16_t*)EEPROM_STATIONS + j, freqCell);
 			}
 			break;
 		} else {
 			for (j = i; j < FM_COUNT; j++) {
-				freqCell = eeprom_read_word(eepromStations + j);
-				eeprom_update_word(eepromStations + j, freq);
+				freqCell = eeprom_read_word((uint16_t*)EEPROM_STATIONS + j);
+				eeprom_update_word((uint16_t*)EEPROM_STATIONS + j, freq);
 				freq = freqCell;
 			}
 			break;
@@ -375,9 +375,9 @@ void tunerPowerOn(void)
 
 void tunerPowerOff(void)
 {
-	eeprom_update_word(eepromFMFreq, _freq);
-	eeprom_update_byte(eepromFMMono, _mono);
-	eeprom_update_byte(eepromFMTuner, _tuner);
+	eeprom_update_word((uint16_t*)EEPROM_FM_FREQ, _freq);
+	eeprom_update_byte((uint8_t*)EEPROM_FM_MONO, _mono);
+	eeprom_update_byte((uint8_t*)EEPROM_FM_TUNER, _tuner);
 
 	switch (_tuner) {
 	case TUNER_TEA5767:

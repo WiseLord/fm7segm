@@ -74,8 +74,8 @@ void segmInit(void)
 	encCnt = 0;
 	cmdBuf = CMD_EMPTY;
 
-	encRes = eeprom_read_byte(eepromEncRes);
-	zeroHour = eeprom_read_byte(eepromZeroHour);
+	encRes = eeprom_read_byte((uint8_t*)EEPROM_ENC_RES);
+	zeroHour = eeprom_read_byte((uint8_t*)EEPROM_HOURZERO);
 
 	return;
 }
@@ -486,7 +486,7 @@ void segmFmFreq(void)
 	if (freq >= 10000) {
 		segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
 	} else {
-		if (freq >= 7600 && eeprom_read_byte(eepromFMStep2) >= 10)
+		if (freq >= 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2) >= 10)
 			segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
 		else
 			segmNum(freq, 2, CH_EMPTY, tunerStereo());
@@ -501,8 +501,8 @@ void segmFmEditFreq(void)
 
 	freq = tunerGetFreq();
 	if (blink > BLINK_TIME) {
-		if ((freq >= 7600 && eeprom_read_byte(eepromFMStep2) >= 10) ||
-		    (freq < 7600 && eeprom_read_byte(eepromFMStep1) >= 10))
+		if ((freq >= 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2) >= 10) ||
+		    (freq < 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP1) >= 10))
 			segmNum(freq/10, 1, CH_EMPTY, 0);
 		else
 			segmNum(freq, 2, CH_EMPTY, 0);
