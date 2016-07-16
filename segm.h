@@ -72,8 +72,7 @@ enum {
 	MODE_FMTUNE_FREQ,
 	MODE_FMTUNE_CHAN,
 	MODE_VOLUME,
-	MODE_TIME_EDIT_H,
-	MODE_TIME_EDIT_M,
+	MODE_TIME_EDIT,
 	MODE_TEMP,
 	MODE_BRIGHTNESS,
 	MODE_STANDBY
@@ -136,9 +135,7 @@ void segmInit(void);
 void segmBrightness(uint8_t value);
 void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd);
 
-void segmTimeHM(void);
-void segmTimeEditH(void);
-void segmTimeEditM(void);
+void segmTime(void);
 
 void segmFmFreq(void);
 void segmFmEditFreq(void);

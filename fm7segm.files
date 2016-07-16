@@ -1,3 +1,5 @@
+Makefile
+
 tuner/rda580x.c
 tuner/rda580x.h
 tuner/tea5767.c
@@ -6,16 +8,16 @@ tuner/tuner.c
 tuner/tuner.h
 tuner/tux032.c
 tuner/tux032.h
+
 ds18x20.c
 ds18x20.h
-ds1307.c
-ds1307.h
 eeprom.h
 i2c.c
 i2c.h
 main.c
-Makefile
 pins.h
+rtc.c
+rtc.h
 segm.c
 segm.h
 volume.c

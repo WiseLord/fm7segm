@@ -3,7 +3,7 @@
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
 
-#include "ds1307.h"
+#include "rtc.h"
 #include "tuner/tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
@@ -230,14 +230,14 @@ ISR (TIMER2_OVF_vect)								/* 8000000 / 8 / 256 = 3906 polls/sec */
 	/* If encoder event has happened, inc/dec encoder counter */
 	if (encRes) {
 		if ((encPrev == ENC_0 && encNow == ENC_A) ||
-		    (encPrev == ENC_A && encNow == ENC_AB) ||
-		    (encPrev == ENC_AB && encNow == ENC_B) ||
-		    (encPrev == ENC_B && encNow == ENC_0))
+				(encPrev == ENC_A && encNow == ENC_AB) ||
+				(encPrev == ENC_AB && encNow == ENC_B) ||
+				(encPrev == ENC_B && encNow == ENC_0))
 			encCnt--;
 		if ((encPrev == ENC_0 && encNow == ENC_B) ||
-		    (encPrev == ENC_B && encNow == ENC_AB) ||
-		    (encPrev == ENC_AB && encNow == ENC_A) ||
-		    (encPrev == ENC_A && encNow == ENC_0))
+				(encPrev == ENC_B && encNow == ENC_AB) ||
+				(encPrev == ENC_AB && encNow == ENC_A) ||
+				(encPrev == ENC_A && encNow == ENC_0))
 			encCnt++;
 		encPrev = encNow; /* Save current encoder state */
 	}
@@ -400,75 +400,34 @@ void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd)
 	return;
 }
 
-void segmTimeHM(void)
+void segmTime(void)
 {
 	uint8_t chZeroHour = CH_EMPTY;
 	if (zeroHour)
 		chZeroHour = CH_0;
 
-	ind[0] = num[time[MIN] % 10];
-	ind[1] = num[time[MIN] / 10];
-#ifdef _NIXIE
-	ind[2] = num[time[HOUR] % 10];
-	(rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4)) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
-	PORT(SEG_P) &= ~SEG_P_LINE;
-	PORT(SEG_F) &= ~SEG_F_LINE;
-#else
-	ind[2] = num[time[HOUR] % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
-#endif
-	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
+	if (rtc.etm == RTC_MIN && blink < BLINK_TIME) {
+		ind[0] = CH_EMPTY;
+		ind[1] = CH_EMPTY;
+	} else {
+		ind[0] = num[rtc.min % 10];
+		ind[1] = num[rtc.min / 10];
+	}
 
-	return;
-}
-
-void segmTimeEditH(void)
-{
-	uint8_t chZeroHour = CH_EMPTY;
-	if (zeroHour)
-		chZeroHour = CH_0;
-
-	ind[0] = num[time[MIN] % 10];
-	ind[1] = num[time[MIN] / 10];
-	if (blink < BLINK_TIME) {
+	if (rtc.etm == RTC_HOUR && blink < BLINK_TIME) {
 		ind[2] = CH_EMPTY;
 		ind[3] = CH_EMPTY;
 	} else {
 #ifdef _NIXIE
-		ind[2] = num[time[HOUR] % 10];
+		ind[2] = num[rtc.hour % 10];
 		(rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4)) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
 		PORT(SEG_P) &= ~SEG_P_LINE;
 		PORT(SEG_F) &= ~SEG_F_LINE;
 #else
-		ind[2] = num[time[HOUR] % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
+		ind[2] = num[rtc.hour % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
 #endif
-		ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
+		ind[3] = rtc.hour / 10 ? num[rtc.hour / 10] : chZeroHour;
 	}
-
-	return;
-}
-
-void segmTimeEditM(void)
-{
-	uint8_t chZeroHour = CH_EMPTY;
-	if (zeroHour)
-		chZeroHour = CH_0;
-
-	if (blink < BLINK_TIME) {
-		ind[0] = CH_EMPTY;
-		ind[1] = CH_EMPTY;
-	} else {
-		ind[0] = num[time[MIN] % 10];
-		ind[1] = num[time[MIN] / 10];
-	}
-#ifdef _NIXIE
-	ind[2] = num[time[HOUR] % 10];
-	(rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4)) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
-	PORT(SEG_P) &= ~SEG_P_LINE;
-	PORT(SEG_F) &= ~SEG_F_LINE;
-#else
-	ind[2] = num[time[HOUR] % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
-#endif
-	ind[3] = time[HOUR] / 10 ? num[time[HOUR] / 10] : chZeroHour;
 
 	return;
 }
@@ -502,7 +461,7 @@ void segmFmEditFreq(void)
 	freq = tunerGetFreq();
 	if (blink > BLINK_TIME) {
 		if ((freq >= 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2) >= 10) ||
-		    (freq < 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP1) >= 10))
+				(freq < 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP1) >= 10))
 			segmNum(freq/10, 1, CH_EMPTY, 0);
 		else
 			segmNum(freq, 2, CH_EMPTY, 0);
@@ -552,10 +511,10 @@ void segmTemp(void)
 
 void segmTimeOrTemp()
 {
-	if (getDevCount() && (time[SEC] % 15 < 2)) {
+	if (getDevCount() && (rtc.sec % 15 < 2)) {
 		segmTemp();
 	} else {
-		segmTimeHM();
+		segmTime();
 	}
 
 	return;

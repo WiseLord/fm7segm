@@ -5,7 +5,7 @@
 
 #include "segm.h"
 #include "i2c.h"
-#include "ds1307.h"
+#include "rtc.h"
 #include "tuner/tuner.h"
 #include "volume.h"
 #include "ds18x20.h"
@@ -36,7 +36,7 @@ static void powerOn(void)
 /* Handle entering standby mode */
 static void powerOff(void)
 {
-	stopEditTime();
+	rtc.etm = RTC_NOEDIT;
 	setBrightness(brStby);
 
 	muteVolume();
@@ -65,7 +65,7 @@ void hwInit(void)
 
 	segmInit();							/* Indicator */
 	I2CInit();							/* I2C bus */
-	ds1307Init();						/* RTC */
+	rtc.etm = RTC_NOEDIT;
 	tunerInit();
 	volumeInit();
 
@@ -94,7 +94,7 @@ int main(void)
 
 		/* Poll RTC for time */
 		if (getRtcTimer() == 0) {
-			readTime();
+			rtcReadTime();
 			setRtcTimer(RTC_POLL_TIME);
 		}
 
@@ -103,7 +103,7 @@ int main(void)
 			if (getTempTimer() == 0)
 				ds18x20GetAllTemps();
 			// Run measurement 4 times per minute
-			if (time[SEC] % 15 == 14)
+			if (rtc.sec % 15 == 14)
 				ds18x20Process();
 		} else {
 			// Continue searching devices
@@ -138,11 +138,11 @@ int main(void)
 				dispMode = defDispMode;
 				break;
 			}
-			if (dispMode == MODE_TIME_EDIT_H) {
-				dispMode = MODE_TIME_EDIT_M;
-				setDisplayTime(DISPLAY_TIME_EDITTIME);
-			} else if (dispMode == MODE_TIME_EDIT_M) {
-				dispMode = MODE_TIME_EDIT_H;
+			if (dispMode == MODE_TIME_EDIT) {
+				if (rtc.etm == RTC_HOUR)
+					rtc.etm = RTC_MIN;
+				else
+					rtc.etm = RTC_HOUR;
 				setDisplayTime(DISPLAY_TIME_EDITTIME);
 			} else if (dispMode == MODE_TEMP) {
 				switch (defDispMode) {
@@ -183,12 +183,8 @@ int main(void)
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
 				switch (dispMode) {
-				case MODE_TIME_EDIT_H:
-					changeTimeH(-1);
-					setDisplayTime(DISPLAY_TIME_EDITTIME);
-					break;
-				case MODE_TIME_EDIT_M:
-					changeTimeM(-1);
+				case MODE_TIME_EDIT:
+					rtcChangeTime(-1);
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
@@ -206,12 +202,8 @@ int main(void)
 				setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 			} else {
 				switch (dispMode) {
-				case MODE_TIME_EDIT_H:
-					changeTimeH(+1);
-					setDisplayTime(DISPLAY_TIME_EDITTIME);
-					break;
-				case MODE_TIME_EDIT_M:
-					changeTimeM(+1);
+				case MODE_TIME_EDIT:
+					rtcChangeTime(+1);
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
@@ -230,12 +222,12 @@ int main(void)
 		case CMD_BTN_2_LONG:
 			editFM = 0;
 			switch (dispMode) {
-			case MODE_TIME_EDIT_H:
-			case MODE_TIME_EDIT_M:
+			case MODE_TIME_EDIT:
 				dispMode = defDispMode;
 				break;
 			default:
-				dispMode = MODE_TIME_EDIT_H;
+				dispMode = MODE_TIME_EDIT;
+				rtc.etm = RTC_HOUR;
 				setDisplayTime(DISPLAY_TIME_EDITTIME);
 				break;
 			}
@@ -247,12 +239,8 @@ int main(void)
 				editFM = 0;
 			} else {
 				switch (dispMode) {
-				case MODE_TIME_EDIT_H:
-					changeTimeH(-10);
-					setDisplayTime(DISPLAY_TIME_EDITTIME);
-					break;
-				case MODE_TIME_EDIT_M:
-					changeTimeM(-10);
+				case MODE_TIME_EDIT:
+					rtcChangeTime(-10);
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
@@ -271,12 +259,8 @@ int main(void)
 				setDisplayTime(DISPLAY_TIME_FMTUNE_CHAN);
 			} else {
 				switch (dispMode) {
-				case MODE_TIME_EDIT_H:
-					changeTimeH(10);
-					setDisplayTime(DISPLAY_TIME_EDITTIME);
-					break;
-				case MODE_TIME_EDIT_M:
-					changeTimeM(10);
+				case MODE_TIME_EDIT:
+					rtcChangeTime(+10);
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
@@ -296,12 +280,8 @@ int main(void)
 			switch (dispMode) {
 			case MODE_STANDBY:
 				break;
-			case MODE_TIME_EDIT_H:
-				changeTimeH(encCnt);
-				setDisplayTime(DISPLAY_TIME_EDITTIME);
-				break;
-			case MODE_TIME_EDIT_M:
-				changeTimeM(encCnt);
+			case MODE_TIME_EDIT:
+				rtcChangeTime(encCnt);
 				setDisplayTime(DISPLAY_TIME_EDITTIME);
 				break;
 			case MODE_FMTUNE_FREQ:
@@ -371,11 +351,8 @@ int main(void)
 		case MODE_FMTUNE_FREQ:
 			segmFmEditFreq();
 			break;
-		case MODE_TIME_EDIT_H:
-			segmTimeEditH();
-			break;
-		case MODE_TIME_EDIT_M:
-			segmTimeEditM();
+		case MODE_TIME_EDIT:
+			segmTime();
 			break;
 		case MODE_BRIGHTNESS:
 			segmBr();
