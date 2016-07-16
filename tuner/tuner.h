@@ -3,10 +3,18 @@
 
 #include <inttypes.h>
 
+#ifdef _TEA5767
 #include "tea5767.h"
+#endif
+#ifdef _RDA580X
 #include "rda580x.h"
+#endif
+#ifdef _TUX032
 #include "tux032.h"
+#endif
+#ifdef _LM7001
 #include "lm7001.h"
+#endif
 
 typedef enum {
 	TUNER_NO = 0,

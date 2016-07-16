@@ -30,9 +30,10 @@ DEPS     = -MMD -MP -MT $(BUILDDIR)/$(*F).o -MF $(BUILDDIR)/$(*D)/$(*F).d
 CFLAGS   = $(DEBUG) -lm $(OPTIMIZE) $(DEPS) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 LDFLAGS  = $(DEBUG) -mmcu=$(MCU) -Wl,-gc-sections -mrelax
 
-# Defines
+# Main definitions
 DEFINES  += -D_$(IND_TYPE) -D_$(USE_TRANS) -D_$(PINOUT)
-DEFINES += -D_TEA5767 -D_RDA580X -D_TUX032 -D_LM7001
+# Supported tuners
+DEFINES += -D_TEA5767 -D_RDA580X -D_TUX032
 
 # AVR toolchain and flasher
 CC       = avr-gcc

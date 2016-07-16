@@ -1,5 +1,7 @@
 #include "rda580x.h"
 
+#include <avr/pgmspace.h>
+
 #include "../i2c.h"
 #ifdef _RDS
 #include "rds.h"
@@ -10,12 +12,29 @@ static uint8_t rdBuf[12];
 static uint8_t _volume = RDA5807_VOL_MAX;
 static rda580xIC _ic;
 
+static const uint8_t initData[] PROGMEM = {
+	/* 0*/ RDA5807_DHIZ,
+	/* 1*/ RDA5807_CLK_MODE_32768 | RDA5807_NEW_METHOD | RDA5807_ENABLE,
+	/* 2*/ 0,
+	/* 3*/ RDA5807_BAND_EASTEUROPE | RDA5807_SPACE_50,
+	/* 4*/ 0,
+	/* 5*/ 0,
+	/* 6*/ 0b1000 & RDA5807_SEEKTH,
+	/* 7*/ RDA5807_LNA_PORT_SEL | RDA5807_VOLUME,
+	/* 8*/ 0,
+	/* 9*/ 0,
+	/*10*/ 0x80 & RDA5807_TH_SOFRBLEND,
+	/*11*/ 0,
+	/*12*/ 0,
+	/*13*/ 0,
+};
+
 static void rda580xWriteI2C(uint8_t bytes)
 {
 	uint8_t i;
 
-	if (!bytes)
-		bytes = sizeof(wrBuf);
+	if (_ic != RDA580X_RDA5807_DF && bytes > 8)
+		bytes = 8;
 
 	I2CStart(RDA5807M_I2C_ADDR);
 	for (i = 0; i < bytes; i++)
@@ -29,28 +48,18 @@ void rda580xInit(rda580xIC ic)
 {
 	_ic = ic;
 
-	wrBuf[0] = RDA5807_DHIZ;
-	wrBuf[1] = RDA5807_CLK_MODE_32768 | RDA5807_RDS_EN | RDA5807_NEW_METHOD | RDA5807_ENABLE;
-	wrBuf[2] = 0;
-	wrBuf[3] = RDA5807_BAND_EASTEUROPE | RDA5807_SPACE_50;
-	wrBuf[4] = 0;
-	wrBuf[5] = 0;
-	wrBuf[6] = 0b1000 & RDA5807_SEEKTH;
-	wrBuf[7] = RDA5807_LNA_PORT_SEL | RDA5807_VOLUME;
-	wrBuf[8] = 0;
-	wrBuf[9] = 0;
+	uint8_t i;
 
-	if (_ic == RDA580X_RDA5807_DF) {
-		wrBuf[10] = 0x80 & RDA5807_TH_SOFRBLEND;
-		wrBuf[11] = RDA5807_FREQ_MODE;
-	} else {
-		wrBuf[10] = (0x80 & RDA5807_TH_SOFRBLEND) | RDA5807_65M_50M_MODE;
-		wrBuf[11] = 0;
-	}
-	wrBuf[12] = 0;
-	wrBuf[13] = 0;
+	for (i = 0; i < sizeof(wrBuf); i++)
+		wrBuf[i] = pgm_read_byte(&initData[i]);
 
-	rda580xWriteI2C(0);
+#ifdef _RDS
+	wrBuf[1] |= RDA5807_RDS_EN;
+#endif
+	if (_ic == RDA580X_RDA5807_DF)
+		wrBuf[11] |= RDA5807_FREQ_MODE;
+
+	rda580xWriteI2C(14);
 
 	return;
 }
@@ -74,7 +83,7 @@ void rda580xSetFreq(uint16_t freq, uint8_t mono)
 		wrBuf[3] |= RDA5807_TUNE | ((chan & 0x03) << 6);	/* 2 LSB */
 	}
 
-	rda580xWriteI2C(0);
+	rda580xWriteI2C(14);
 
 #ifdef _RDS
 	rdsDisable();
@@ -95,14 +104,16 @@ uint8_t *rda580xReadStatus(void)
 
 	// Get RDS data
 #ifdef _RDS
-	/* If seek/tune is complete and current channel is a station */
-	if ((rdBuf[0] & RDA5807_STC) && (rdBuf[2] & RDA5807_FM_TRUE)) {
-		/* If RDS ready and sync flag are set */
-		if ((rdBuf[0] & RDA5807_RDSR) && (rdBuf[0] & RDA5807_RDSS)) {
-			/* If there are no errors in blocks A and B */
-			if (!(rdBuf[3] & (RDA5807_BLERA | RDA5807_BLERB))) {
-				/* Send rdBuf[4..11] as 16-bit blocks A-D */
-				rdsSetBlocks(&rdBuf[4]);
+	if (_ic == RDA580X_RDA5807 || _ic == RDA580X_RDA5807_DF) {
+		/* If seek/tune is complete and current channel is a station */
+		if ((rdBuf[0] & RDA5807_STC) && (rdBuf[2] & RDA5807_FM_TRUE)) {
+			/* If RDS ready and sync flag are set */
+			if ((rdBuf[0] & RDA5807_RDSR) && (rdBuf[0] & RDA5807_RDSS)) {
+				/* If there are no errors in blocks A and B */
+				if (!(rdBuf[3] & (RDA5807_BLERA | RDA5807_BLERB))) {
+					/* Send rdBuf[4..11] as 16-bit blocks A-D */
+					rdsSetBlocks(&rdBuf[4]);
+				}
 			}
 		}
 	}
