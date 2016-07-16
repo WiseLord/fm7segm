@@ -337,6 +337,20 @@ void tunerSetMute(uint8_t mute)
 	return;
 }
 
+void tunerSetVolume(int8_t value)
+{
+	switch (_tuner) {
+	case TUNER_RDA5807:
+	case TUNER_RDA5802:
+		rda580xSetVolume(value);
+		break;
+	default:
+		break;
+	}
+
+	return;
+}
+
 void tunerPowerOn(void)
 {
 	switch (_tuner) {

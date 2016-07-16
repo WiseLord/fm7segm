@@ -47,6 +47,7 @@ void tunerLoadFavStation(uint8_t num);
 void tunerStoreFavStation(uint8_t num);
 
 void tunerSetMute(uint8_t mute);
+void tunerSetVolume(int8_t value);
 
 void tunerPowerOn(void);
 void tunerPowerOff(void);

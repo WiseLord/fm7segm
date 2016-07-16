@@ -49,9 +49,7 @@ void setVolume(int8_t value)
 
 	vol = value;
 
-	if (tunerGetType() == TUNER_RDA5807 ||
-	    tunerGetType() == TUNER_RDA5802)
-		rda580xSetVolume(value);
+	tunerSetVolume(value);
 
 	return;
 }
