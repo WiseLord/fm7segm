@@ -1,6 +1,6 @@
-IND_TYPE = _CC
-USE_TRANS = _NO
-PINOUT = _PIN1
+IND_TYPE = CC
+USE_TRANS = NO
+PINOUT = PIN1
 
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
@@ -29,6 +29,10 @@ DEBUG    = -g -Wall -Werror
 DEPS     = -MMD -MP -MT $(BUILDDIR)/$(*F).o -MF $(BUILDDIR)/$(*D)/$(*F).d
 CFLAGS   = $(DEBUG) -lm $(OPTIMIZE) $(DEPS) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 LDFLAGS  = $(DEBUG) -mmcu=$(MCU) -Wl,-gc-sections -mrelax
+
+# Defines
+DEFINES  += -D_$(IND_TYPE) -D_$(USE_TRANS) -D_$(PINOUT)
+DEFINES += -D_TEA5767 -D_RDA580X -D_TUX032 -D_LM7001
 
 # AVR toolchain and flasher
 CC       = avr-gcc
@@ -63,7 +67,7 @@ size:
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -D$(IND_TYPE) -D$(USE_TRANS) -D$(PINOUT) -c -o $@ $<
+	$(CC) $(CFLAGS) $(DEFINES) -c -o $@ $<
 
 .PHONY: clean
 clean:

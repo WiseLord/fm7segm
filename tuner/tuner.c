@@ -24,20 +24,26 @@ void tunerInit(void)
 	_step2 = eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2);
 
 	if (_tuner >= TUNER_END)
-		_tuner = TUNER_TEA5767;
+		_tuner = TUNER_NO;
 
 	switch (_tuner) {
 	case TUNER_TEA5767:
 		tea5767Init(ctrl);
 		break;
 	case TUNER_RDA5807:
-		rda580xInit(RDA5807_DIRECT_FREQ);
+		rda580xInit(RDA580X_RDA5807);
+		break;
+	case TUNER_RDA5802:
+		rda580xInit(RDA580X_RDA5802);
+		break;
+	case TUNER_RDA5807_DF:
+		rda580xInit(RDA580X_RDA5807_DF);
 		break;
 	case TUNER_TUX032:
 		tux032Init();
 		break;
-	case TUNER_RDA5802:
-		rda580xInit(RDA5807_GRID_FREQ);
+	case TUNER_LM7001:
+		lm7001Init();
 		break;
 	default:
 		break;
@@ -67,13 +73,15 @@ void tunerSetFreq(uint16_t freq)
 		tea5767SetFreq(_freq, _mono);
 		break;
 	case TUNER_RDA5807:
-		rda580xSetFreq(_freq, _mono, RDA5807_DIRECT_FREQ);
+	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
+		rda580xSetFreq(_freq, _mono);
 		break;
 	case TUNER_TUX032:
 		tux032SetFreq(_freq);
 		break;
-	case TUNER_RDA5802:
-		rda580xSetFreq(_freq, _mono, RDA5807_GRID_FREQ);
+	case TUNER_LM7001:
+		lm7001SetFreq(_freq);
 		break;
 	default:
 		break;
@@ -121,6 +129,7 @@ void tunerReadStatus(void)
 		break;
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		bufFM = rda580xReadStatus();
 		break;
 	case TUNER_TUX032:
@@ -137,10 +146,16 @@ void tunerSwitchMono(void)
 {
 	_mono = !_mono;
 
-	if (_tuner == TUNER_TEA5767 ||
-	    _tuner == TUNER_RDA5807 ||
-	    _tuner == TUNER_RDA5807)
+	switch (_tuner) {
+	case TUNER_TEA5767:
+	case TUNER_RDA5807:
+	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		tunerSetFreq(tunerGetFreq());
+		break;
+	default:
+		break;
+	}
 
 	return;
 }
@@ -155,6 +170,7 @@ uint8_t tunerStereo(void)
 		break;
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		ret = RDA5807_BUF_STEREO(bufFM) && !_mono;
 		break;
 	case TUNER_TUX032:
@@ -178,19 +194,18 @@ uint8_t tunerLevel(void)
 		break;
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		rawLevel = (bufFM[2] & RDA5807_RSSI) >> 1;
 		if (rawLevel < 24)
 			ret = 0;
 		else
 			ret = (rawLevel - 24) >> 1;
 		break;
-	case TUNER_TUX032:
+	default:
 		if (tunerStereo())
 			ret = 13;
 		else
 			ret = 3;
-		break;
-	default:
 		break;
 	}
 
@@ -325,6 +340,7 @@ void tunerSetMute(uint8_t mute)
 		break;
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		rda580xSetMute(mute);
 		break;
 	case TUNER_TUX032:
@@ -342,6 +358,7 @@ void tunerSetVolume(int8_t value)
 	switch (_tuner) {
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		rda580xSetVolume(value);
 		break;
 	default:
@@ -359,6 +376,7 @@ void tunerPowerOn(void)
 		break;
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		rda580xPowerOn();
 		break;
 	case TUNER_TUX032:
@@ -385,6 +403,7 @@ void tunerPowerOff(void)
 		break;
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		rda580xPowerOff();
 		break;
 	case TUNER_TUX032:

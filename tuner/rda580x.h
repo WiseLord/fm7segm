@@ -129,13 +129,14 @@
 #define RDA5807_BUF_STEREO(buf)	(buf[0] & RDA5807_ST)
 
 typedef enum {
-	RDA5807_GRID_FREQ,
-	RDA5807_DIRECT_FREQ,
-} freqMethod;
+	RDA580X_RDA5807,
+	RDA580X_RDA5802,
+	RDA580X_RDA5807_DF,
+} rda580xIC;
 
-void rda580xInit(freqMethod frMeth);
+void rda580xInit(rda580xIC ic);
 
-void rda580xSetFreq(uint16_t freq, uint8_t mono, freqMethod frMeth);
+void rda580xSetFreq(uint16_t freq, uint8_t mono);
 
 uint8_t *rda580xReadStatus(void);
 

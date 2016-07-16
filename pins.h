@@ -185,4 +185,13 @@
 
 #endif
 
+// LM7001 is not supported, but requires pin description
+
+#define LM7001_DATA			VOLUME
+#define LM7001_DATA_LINE	VOLUME_LINE
+#define LM7001_CL			VOLUME
+#define LM7001_CL_LINE		VOLUME_LINE
+#define LM7001_CE			VOLUME
+#define LM7001_CE_LINE		VOLUME_LINE
+
 #endif /* PINS_H */

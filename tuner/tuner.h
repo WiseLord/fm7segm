@@ -2,16 +2,21 @@
 #define TUNER_H
 
 #include <inttypes.h>
+
 #include "tea5767.h"
 #include "rda580x.h"
 #include "tux032.h"
+#include "lm7001.h"
 
 typedef enum {
 	TUNER_NO = 0,
 	TUNER_TEA5767,
 	TUNER_RDA5807,
 	TUNER_TUX032,
+	TUNER_LM7001,
 	TUNER_RDA5802,
+	TUNER_RDA5807_DF,
+
 	TUNER_END
 } tunerIC;
 
@@ -19,9 +24,6 @@ typedef enum {
 
 #define SEARCH_UP			1
 #define SEARCH_DOWN			-1
-
-#define FM_MONO				1
-#define FM_STEREO			0
 
 void tunerInit(void);
 tunerIC tunerGetType(void);
