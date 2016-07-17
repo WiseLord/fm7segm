@@ -28,7 +28,7 @@ static void powerOn(void)
 	unmuteVolume();
 	setVolume(getVolume());
 	setBrightness(brWork);
-	tunerSetFreq(tunerGetFreq());
+	tunerSetFreq();
 
 	return;
 }
@@ -46,8 +46,8 @@ static void powerOff(void)
 	eeprom_update_byte((uint8_t*)EEPROM_DISPLAY, defDispMode);
 	eeprom_update_byte((uint8_t*)EEPROM_BR_WORK, brWork);
 
-	eeprom_update_word((uint16_t*)EEPROM_FM_FREQ, tunerGetFreq());
-	eeprom_update_byte((uint8_t*)EEPROM_FM_MONO, tunerGetMono());
+	eeprom_update_word((uint16_t*)EEPROM_FM_FREQ, tuner.freq);
+	eeprom_update_byte((uint8_t*)EEPROM_FM_MONO, tuner.mono);
 
 	return;
 }

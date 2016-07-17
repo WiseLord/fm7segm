@@ -15,18 +15,19 @@
 #define EEPROM_ENC_RES			0x06
 #define EEPROM_HOURZERO			0x07
 
-// FM radio parameters
-#define EEPROM_FM_FREQ			0x10
-#define EEPROM_FM_FREQ_MIN		0x14
-#define EEPROM_FM_FREQ_MAX		0x16
+/* FM tuner parameters valus */
+#define EEPROM_FM_TUNER			0x20
+#define EEPROM_FM_CTRL			(EEPROM_FM_TUNER + 0x01)
+#define EEPROM_FM_STEP1			(EEPROM_FM_TUNER + 0x02)
+#define EEPROM_FM_STEP2			(EEPROM_FM_TUNER + 0x03)
+#define EEPROM_FM_FREQ_MIN		(EEPROM_FM_TUNER + 0x04)
+#define EEPROM_FM_FREQ_MAX		(EEPROM_FM_TUNER + 0x06)
+#define EEPROM_FM_FREQ			(EEPROM_FM_TUNER + 0x08)
+#define EEPROM_FM_MONO			(EEPROM_FM_TUNER + 0x0A)
+#define EEPROM_FM_RDS			(EEPROM_FM_TUNER + 0x0B)
 
-#define EEPROM_FM_TUNER			0x1A
-#define EEPROM_FM_MONO			0x1C
-#define EEPROM_FM_STEP1			0x1D
-#define EEPROM_FM_STEP2			0x1E
-#define EEPROM_FM_CTRL			0x1F
-
-#define EEPROM_STATIONS			0x20
-#define EEPROM_FAV_STATIONS		0x88
+/* FM stations */
+#define EEPROM_FAV_STATIONS		(EEPROM_FM_TUNER + 0x10)
+#define EEPROM_STATIONS			(EEPROM_FM_TUNER + 0x24)
 
 #endif // EEPROM_H

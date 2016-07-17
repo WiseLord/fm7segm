@@ -2,7 +2,6 @@
 #define VOLUME_H
 
 #include "pins.h"
-#include "tuner/tuner.h"
 
 #define VOL_MIN				0
 #define VOL_MAX				16

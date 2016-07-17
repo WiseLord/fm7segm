@@ -434,18 +434,17 @@ void segmTime(void)
 
 void segmFmFreq(void)
 {
-	uint16_t freq;
+	uint16_t freq = tuner.freq;
 
 	if (getFmStatusTimer() == 0) {
 		tunerReadStatus();
 		setFmStatusTimer(FM_STATUS_TIME);
 	}
 
-	freq = tunerGetFreq();
 	if (freq >= 10000) {
 		segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
 	} else {
-		if (freq >= 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2) >= 10)
+		if (freq >= FM_BAND_DIV_FREQ && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2) >= 10)
 			segmNum(freq/10, 1, CH_EMPTY, tunerStereo());
 		else
 			segmNum(freq, 2, CH_EMPTY, tunerStereo());
@@ -456,12 +455,11 @@ void segmFmFreq(void)
 
 void segmFmEditFreq(void)
 {
-	uint16_t freq;
+	uint16_t freq= tuner.freq;
 
-	freq = tunerGetFreq();
 	if (blink > BLINK_TIME) {
-		if ((freq >= 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2) >= 10) ||
-				(freq < 7600 && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP1) >= 10))
+		if ((freq >= FM_BAND_DIV_FREQ && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP2) >= 10) ||
+				(freq < FM_BAND_DIV_FREQ && eeprom_read_byte((uint8_t*)EEPROM_FM_STEP1) >= 10))
 			segmNum(freq/10, 1, CH_EMPTY, 0);
 		else
 			segmNum(freq, 2, CH_EMPTY, 0);

@@ -3,6 +3,7 @@
 #include "avr/interrupt.h"
 #include "avr/eeprom.h"
 #include "eeprom.h"
+#include "tuner/tuner.h"
 
 static volatile int8_t vol;
 
@@ -63,10 +64,15 @@ void muteVolume(void)
 {
 	tunerSetMute(1);
 
-	tunerIC tuner = tunerGetType();
-
-	if (tuner != TUNER_RDA5807 && tuner != TUNER_RDA5802)
+	switch (tuner.ic) {
+	case TUNER_RDA5807:
+	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
+		break;
+	default:
 		TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
+		break;
+	}
 
 	DDR(VOLUME) |= VOLUME_LINE;							/* Set as output */
 	PORT(VOLUME) &= ~VOLUME_LINE;						/* Pull amplifier input to ground */
@@ -78,13 +84,18 @@ void unmuteVolume(void)
 {
 	tunerSetMute(0);
 
-	if (tunerGetType() == TUNER_RDA5807 ||
-	    tunerGetType() == TUNER_RDA5802) {
+	switch (tuner.ic) {
+	case TUNER_RDA5807:
+	case TUNER_RDA5802:
+	case TUNER_RDA5807_DF:
 		DDR(VOLUME) &= ~VOLUME_LINE;					/* Set as input */
 		PORT(VOLUME) |= VOLUME_LINE;					/* Add pullup resistor */
-	} else {
+
+		break;
+	default:
 		DDR(VOLUME) |= VOLUME_LINE;						/* Set as output */
 		TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
+		break;
 	}
 
 	return;
