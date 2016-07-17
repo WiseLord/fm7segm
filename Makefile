@@ -7,9 +7,9 @@ lc = $(shell echo $1 | tr A-Z a-z)
 
 # Output file name
 ifeq ($(IND_TYPE), _NIXIE)
-TARG = fm7segm$(call lc,$(PINOUT))$(call lc,$(IND_TYPE))
+TARG = fm7segm_$(call lc,$(PINOUT))_$(call lc,$(IND_TYPE))
 else
-TARG = fm7segm$(call lc,$(PINOUT))$(call lc,$(IND_TYPE))$(call lc,$(USE_TRANS))
+TARG = fm7segm_$(call lc,$(PINOUT))_$(call lc,$(IND_TYPE))_$(call lc,$(USE_TRANS))
 endif
 
 # MCU name and frequency
@@ -51,17 +51,17 @@ AD_CMD   = $(AD_MCU) $(AD_PROG) $(AD_PORT) -V
 # Build objects
 OBJS     = $(addprefix $(BUILDDIR)/, $(SRCS:.c=.o))
 ELF      = $(BUILDDIR)/$(TARG).elf
+HEX      = flash/$(TARG).hex
 
-all: $(ELF) size
-
-# Dependencies
--include $(OBJS:.o=.d)
+all: $(HEX) size
 
 $(ELF): $(OBJS)
 	@mkdir -p $(BUILDDIR) flash
 	$(CC) $(LDFLAGS) -o $(ELF) $(OBJS) -lm
-	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) flash/$(TARG).hex
 	$(OBJDUMP) -h -S $(ELF) > $(BUILDDIR)/$(TARG).lss
+
+$(HEX): $(ELF)
+	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) $(HEX)
 
 size:
 	@sh ./size.sh $(ELF)
@@ -75,17 +75,17 @@ clean:
 	rm -rf $(BUILDDIR)
 
 .PHONY: flash
-flash: $(ELF)
-	$(AVRDUDE) $(AD_CMD) -U flash:w:flash/$(TARG).hex:i
+flash: $(HEX)
+	$(AVRDUDE) $(AD_CMD) -U flash:w:$(HEX).hex:i
 
-.PHONY: eeprom_rda5807
 eeprom_rda5807:
 	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm_rda5807.bin:r
 
-.PHONY: eeprom_tea5767
 eeprom_tea5767:
 	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm_tea5767.bin:r
 
-.PHONY: fuse
 fuse:
 	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0x24:m -U hfuse:w:0xC1:m
+
+# Dependencies
+-include $(OBJS:.o=.d)
