@@ -6,7 +6,7 @@ PINOUT = PIN1
 lc = $(shell echo $1 | tr A-Z a-z)
 
 # Output file name
-ifeq ($(IND_TYPE), _NIXIE)
+ifeq ($(IND_TYPE), NIXIE)
 TARG = fm7segm_$(call lc,$(PINOUT))_$(call lc,$(IND_TYPE))
 else
 TARG = fm7segm_$(call lc,$(PINOUT))_$(call lc,$(IND_TYPE))_$(call lc,$(USE_TRANS))
@@ -76,7 +76,7 @@ clean:
 
 .PHONY: flash
 flash: $(HEX)
-	$(AVRDUDE) $(AD_CMD) -U flash:w:$(HEX).hex:i
+	$(AVRDUDE) $(AD_CMD) -U flash:w:$(HEX):i
 
 eeprom_rda5807:
 	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm_rda5807.bin:r
