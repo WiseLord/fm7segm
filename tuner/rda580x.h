@@ -120,28 +120,32 @@
  * or 4-11 => E when ABCD_E = 1
  */
 
+#define RDA5807_BUF_READY(buf)	(buf[3] & RDA5807_FM_READY)
+#define RDA5807_BUF_STEREO(buf)	(buf[0] & RDA5807_ST)
+
 #define RDA5807_CHAN_SPACING		5
 
 #define RDA5807_VOL_MIN				0
 #define RDA5807_VOL_MAX				16
 
-#define RDA5807_BUF_READY(buf)	(buf[3] & RDA5807_FM_READY)
-#define RDA5807_BUF_STEREO(buf)	(buf[0] & RDA5807_ST)
+#define RDA5807_WR_BYTES			14
+#define RDA5802_WR_BYTES			10
 
-typedef enum {
-	RDA580X_RDA5807,
-	RDA580X_RDA5802,
-	RDA580X_RDA5807_DF,
-} rda580xIC;
+#define RDA5802_MIN_FREQ			6500
+#define RDA5807_MIN_FREQ			5000
 
-void rda580xInit(rda580xIC ic);
+#define RDA5807_BAND_CHANGE_FREQ	8700
 
-void rda580xSetFreq(uint16_t freq, uint8_t mono);
+void rda580xInit(void);
+
+void rda580xSetFreq(void);
 
 uint8_t *rda580xReadStatus(void);
 
-void rda580xSetMute(uint8_t mute);
-void rda580xSetVolume(int8_t value);
+void rda580xSetMute(void);
+void rda580xSetVolume(void);
+
+void rda580xSetBass(void);
 
 void rda580xPowerOn(void);
 void rda580xPowerOff(void);
