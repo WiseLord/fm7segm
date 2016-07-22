@@ -264,7 +264,7 @@ int main(void)
 					setDisplayTime(DISPLAY_TIME_EDITTIME);
 					break;
 				default:
-					tunerSwitchMono();
+					tunerSetMono(!tuner.mono);
 					dispMode = MODE_FM_CHAN;
 					setDisplayTime(DISPLAY_TIME_FM_CHAN);
 					break;
