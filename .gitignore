@@ -1,7 +1,4 @@
-*.d
-*.elf
-*.hex
-*.o
-*.lss
 build-*
-*.creator.user*
+build/*
+*.user
+*.hex
