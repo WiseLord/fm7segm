@@ -402,32 +402,127 @@ void segmNum(int16_t number, uint8_t dot, uint8_t label, uint8_t stInd)
 
 void segmTime(void)
 {
-	uint8_t chZeroHour = CH_EMPTY;
-	if (zeroHour)
-		chZeroHour = CH_0;
+	// Second dot
+	uint8_t secDot = 0;
 
-	if (rtc.etm == RTC_MIN && blink < BLINK_TIME) {
-		ind[0] = CH_EMPTY;
-		ind[1] = CH_EMPTY;
-	} else {
-		ind[0] = num[rtc.min % 10];
-		ind[1] = num[rtc.min / 10];
+	// Data for left and right halfs of display
+	uint8_t tmL = rtc.hour;
+	uint8_t tmR = rtc.min;
+
+	// Indicator data;
+	uint8_t d[4];
+
+	if (rtcTimer > RTC_POLL_TIME * SCAN_FACTOR / 4)
+		secDot = 1;
+
+	// Select time parameters to show on display
+	switch (rtc.etm) {
+	case RTC_SEC:
+		tmL = rtc.min;
+		tmR = rtc.sec;
+		break;
+	case RTC_DATE:
+		tmL = rtc.date;
+		break;
+	case RTC_MONTH:
+		tmR = rtc.month;
+		break;
+	case RTC_YEAR:
+		tmL = 20;
+		tmR = rtc.year;
+		break;
+	default:
+		break;
 	}
 
-	if (rtc.etm == RTC_HOUR && blink < BLINK_TIME) {
-		ind[2] = CH_EMPTY;
-		ind[3] = CH_EMPTY;
-	} else {
+	// Limit time values
+	if (tmL > 99)
+		tmL = 0;
+	if (tmR > 99)
+		tmR = 0;
+
+	// Prepare indicators data
+	d[0] = num[tmR % 10];
+	d[1] = num[tmR / 10];
+	d[2] = num[tmL % 10];
+	d[3] = num[tmL / 10];
+
+	// Hide month
+	if (rtc.etm == RTC_DATE) {
+		d[0] = CH_EMPTY;
+		d[1] = CH_EMPTY;
+	}
+
+	// Hide date
+	if (rtc.etm == RTC_MONTH) {
+		d[2] = CH_EMPTY;
+		d[3] = CH_EMPTY;
+	}
+
+	// hide blinking parameter
+	if (blink < BLINK_TIME) {
+		switch (rtc.etm) {
+		case RTC_SEC:
+		case RTC_MIN:
+		case RTC_MONTH:
+		case RTC_YEAR:
+			d[0] = CH_EMPTY;
+			d[1] = CH_EMPTY;
+			break;
+		}
+		switch (rtc.etm) {
+		case RTC_HOUR:
+		case RTC_DATE:
+		case RTC_YEAR:
+			d[2] = CH_EMPTY;
+			d[3] = CH_EMPTY;
+			break;
+		default:
+			break;
+		}
+	}
+
+	// Add seconds dot
+	switch (rtc.etm) {
+	case RTC_DATE:
+	case RTC_MONTH:
+	case RTC_YEAR:
+		break;
+	default:
 #ifdef _NIXIE
-		ind[2] = num[rtc.hour % 10];
-		(rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4)) ? (PORT(SEG_G) |= SEG_G_LINE) : (PORT(SEG_G) &= ~SEG_G_LINE);
-		PORT(SEG_P) &= ~SEG_P_LINE;
-		PORT(SEG_F) &= ~SEG_F_LINE;
+		PORT(SEG_G) |= SEG_G_LINE;
 #else
-		ind[2] = num[rtc.hour % 10] | (rtcTimer > (RTC_POLL_TIME * SCAN_FACTOR / 4) ? BIT_P : CH_EMPTY);
+		d[2] |= BIT_P;
 #endif
-		ind[3] = rtc.hour / 10 ? num[rtc.hour / 10] : chZeroHour;
+		break;
 	}
+
+	// Hide seconds dot and hour zero
+	switch (rtc.etm) {
+	case RTC_SEC:
+	case RTC_DATE:
+	case RTC_MONTH:
+	case RTC_YEAR:
+		break;
+	default:
+		if (zeroHour) {
+			if (rtc.hour < 10)
+				d[3] = CH_EMPTY;
+		}
+		if (secDot) {
+#ifdef _NIXIE
+			PORT(SEG_G) &= ~SEG_G_LINE;
+#else
+			d[2] &= ~BIT_P;
+#endif
+		}
+		break;
+	}
+
+	// Show result
+	uint8_t i;
+	for (i = 0; i < DIGITS; i++)
+		ind[i] = d[i];
 
 	return;
 }

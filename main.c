@@ -139,10 +139,13 @@ int main(void)
 				break;
 			}
 			if (dispMode == MODE_TIME_EDIT) {
-				if (rtc.etm == RTC_HOUR)
-					rtc.etm = RTC_MIN;
-				else
-					rtc.etm = RTC_HOUR;
+				if (rtc.etm == RTC_YEAR) {
+					rtc.etm = RTC_NOEDIT;
+					dispMode = MODE_TIME;
+					setDisplayTime(DISPLAY_TIME_TIME);
+					break;
+				}
+				rtcNextEditParam();
 				setDisplayTime(DISPLAY_TIME_EDITTIME);
 			} else if (dispMode == MODE_TEMP) {
 				switch (defDispMode) {
@@ -224,6 +227,7 @@ int main(void)
 			switch (dispMode) {
 			case MODE_TIME_EDIT:
 				dispMode = defDispMode;
+				rtc.etm = RTC_NOEDIT;
 				break;
 			default:
 				dispMode = MODE_TIME_EDIT;
@@ -327,6 +331,7 @@ int main(void)
 					setDisplayTime(DISPLAY_TIME_FMTUNE_FREQ);
 				} else {
 					dispMode = defDispMode;
+					rtc.etm = RTC_NOEDIT;
 				}
 				break;
 			}
