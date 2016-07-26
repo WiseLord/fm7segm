@@ -3,7 +3,7 @@
 
 #include "ui_mainwindow.h"
 
-#define EEPROM_RESOURCE ":/res/fm7segm_rda5807.bin"
+#define EEPROM_RESOURCE ":/res/fm7segm.bin"
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -52,6 +52,7 @@ private slots:
     void setEncres(int value);
     void setVolume(double value);
     void setHourzero(int value);
+    void setIndType();
 };
 
 #endif // MAINWINDOW_H

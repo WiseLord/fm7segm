@@ -1,16 +1,10 @@
-IND_TYPE = CC
-USE_TRANS = NO
 PINOUT = PIN1
 
 # Lowercase argument
 lc = $(shell echo $1 | tr A-Z a-z)
 
 # Output file name
-ifeq ($(IND_TYPE), NIXIE)
-TARG = fm7segm_$(call lc,$(PINOUT))_$(call lc,$(IND_TYPE))
-else
-TARG = fm7segm_$(call lc,$(PINOUT))_$(call lc,$(IND_TYPE))_$(call lc,$(USE_TRANS))
-endif
+TARG = fm7segm_$(call lc,$(PINOUT))
 
 # MCU name and frequency
 MCU      = atmega8
@@ -31,7 +25,7 @@ CFLAGS   = $(DEBUG) -lm $(OPTIMIZE) $(DEPS) -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 LDFLAGS  = $(DEBUG) -mmcu=$(MCU) -Wl,-gc-sections -mrelax
 
 # Main definitions
-DEFINES  += -D_$(IND_TYPE) -D_$(USE_TRANS) -D_$(PINOUT)
+DEFINES  += -D_$(PINOUT)
 # Supported tuners
 DEFINES += -D_TEA5767 -D_RDA580X -D_TUX032
 
@@ -78,11 +72,8 @@ clean:
 flash: $(HEX)
 	$(AVRDUDE) $(AD_CMD) -U flash:w:$(HEX):i
 
-eeprom_rda5807:
-	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm_rda5807.bin:r
-
-eeprom_tea5767:
-	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm_tea5767.bin:r
+eeprom:
+	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm.bin:r
 
 fuse:
 	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0x24:m -U hfuse:w:0xC1:m

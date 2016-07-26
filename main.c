@@ -14,13 +14,6 @@
 static uint8_t defDispMode = MODE_TIME;
 static int8_t brWork, brStby;
 
-static void segmBr(void)
-{
-	segmNum(brWork, 0, CH_E, 0);
-
-	return;
-}
-
 /* Handle leaving standby mode */
 static void powerOn(void)
 {
@@ -360,7 +353,7 @@ int main(void)
 			segmTime();
 			break;
 		case MODE_BRIGHTNESS:
-			segmBr();
+			segmBr(brWork);
 			break;
 		default:
 			segmVol();

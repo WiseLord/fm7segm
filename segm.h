@@ -1,27 +1,7 @@
 #ifndef SEGM_H
 #define SEGM_H
 
-#include "pins.h"
-
-/* Nixie bin-dec decoder looks like common cathode indicator with transistors */
-#ifdef _NIXIE
-#undef _CA
-#ifndef _CC
-#define _CC
-#endif
-#ifndef _TR
-#define _TR
-#endif
-#endif
-
-/* _CC: Use indicators with common cathode by default */
-#if !defined(_CC) && !defined(_CA)
-#define _CC
-#endif
-
-#if (defined (_CC) && !defined(_TR)) || (!defined(_CC) && defined(_TR))
-#define INV_DIG
-#endif
+#include <inttypes.h>
 
 #define BR_MIN		1
 #define BR_MAX		12
@@ -37,17 +17,12 @@
 #define BIT_G		(1<<6)
 #define BIT_P		(1<<7)
 
-#ifdef _NIXIE
-#define CH_EMPTY	0xF
-enum {
-	CH_0, CH_1, CH_2, CH_3, CH_4, CH_5, CH_6, CH_7, CH_8, CH_9
-};
+#define NIX_EMPTY	0xF
 
-#define CH_G		CH_9
-#define CH_C		CH_5
-#define CH_E		CH_3
-#else
-#define CH_EMPTY	0
+#define NIX_G		9
+#define NIX_C		5
+#define NIX_E		3
+
 #define CH_0		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_E | BIT_F)
 #define CH_1		(BIT_B | BIT_C)
 #define CH_2		(BIT_A | BIT_B | BIT_D | BIT_E | BIT_G)
@@ -62,7 +37,20 @@ enum {
 #define CH_G		(BIT_A | BIT_E | BIT_F)
 #define CH_C		(BIT_A | BIT_D | BIT_E | BIT_F)
 #define CH_E		(BIT_A | BIT_B | BIT_C | BIT_D | BIT_G)
-#endif
+
+// Indicator types
+enum {
+	IND_CC_TR = 0b000,
+	IND_CC_NO = 0b001,
+	IND_CA_TR = 0b010,
+	IND_CA_NO = 0b011,
+	IND_NIXIE = 0b100,
+
+	IND_END,
+};
+#define IND_BIT_TRANS				0b001
+#define IND_BIT_TYPE				0b010
+#define IND_BIT_NIXIE				0b100
 
 /* Display modes */
 enum {
@@ -119,17 +107,14 @@ enum {
 	CMD_EMPTY = 0xEF
 };
 
-/* Timings */
-#ifdef _NIXIE
-#define SCAN_FACTOR					1
-#else
-#define SCAN_FACTOR					8
-#endif
-#define SHORT_PRESS					SCAN_FACTOR * 50
-#define LONG_PRESS					SCAN_FACTOR * 200
-#define AUTOREPEAT					SCAN_FACTOR * 150
-#define BLINK_PERIOD				SCAN_FACTOR * 250
-#define BLINK_TIME					SCAN_FACTOR * 100
+#define SCAN_FACTOR_NIXIE			1
+#define SCAN_FACTOR_7SEGM			8
+
+#define SHORT_PRESS					(scan * 50)
+#define LONG_PRESS					(scan * 200)
+#define AUTOREPEAT					(scan * 150)
+#define BLINK_PERIOD				(scan * 250)
+#define BLINK_TIME					(scan * 100)
 
 void segmInit(void);
 void segmBrightness(uint8_t value);
@@ -143,6 +128,8 @@ void segmFmNum(void);
 
 void segmVol(void);
 void segmTemp(void);
+
+void segmBr(uint8_t value);
 
 void segmTimeOrTemp(void);
 

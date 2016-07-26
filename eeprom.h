@@ -15,6 +15,9 @@
 #define EEPROM_ENC_RES			0x06
 #define EEPROM_HOURZERO			0x07
 
+// Indicator type
+#define EEPROM_IND_TYPE			0x10
+
 /* FM tuner parameters valus */
 #define EEPROM_FM_TUNER			0x20
 #define EEPROM_FM_CTRL			(EEPROM_FM_TUNER + 0x01)

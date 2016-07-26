@@ -6,6 +6,7 @@
 #include "aboutdialog.h"
 
 #include "../eeprom.h"
+#include "../segm.h"
 #include "../tuner/tuner.h"
 #include "../tuner/tea5767.h"
 
@@ -330,6 +331,17 @@ void MainWindow::setOther()
 
     setVolume(eep[EEPROM_VOLUME]);
     dsbVolume->setValue(eep[EEPROM_VOLUME]);
+
+    if (IND_NIXIE == eep[EEPROM_IND_TYPE])
+      rbIndTypeNIXIE->setChecked(true);
+    else if (IND_CA_NO == eep[EEPROM_IND_TYPE])
+      rbIndTypeCANO->setChecked(true);
+    else if (IND_CA_TR == eep[EEPROM_IND_TYPE])
+      rbIndTypeCATR->setChecked(true);
+    else if (IND_CC_TR == eep[EEPROM_IND_TYPE])
+      rbIndTypeCCTR->setChecked(true);
+    else
+      rbIndTypeCCNO->setChecked(true);
 }
 
 void MainWindow::setBrstby(int value)
@@ -360,4 +372,20 @@ void MainWindow::setHourzero(int value)
 {
   eep[EEPROM_HOURZERO] = (char) value;
   updateHexTable(EEPROM_HOURZERO);
+}
+
+void MainWindow::setIndType()
+{
+  if (rbIndTypeCCTR->isChecked())
+    eep[EEPROM_IND_TYPE] = IND_CC_TR;
+  else if (rbIndTypeCATR->isChecked())
+    eep[EEPROM_IND_TYPE] = IND_CA_TR;
+  else if (rbIndTypeCANO->isChecked())
+    eep[EEPROM_IND_TYPE] = IND_CA_NO;
+  else if (rbIndTypeNIXIE->isChecked())
+    eep[EEPROM_IND_TYPE] = IND_NIXIE;
+  else
+    eep[EEPROM_IND_TYPE] = IND_CC_NO;
+
+  updateHexTable(EEPROM_IND_TYPE);
 }

@@ -866,6 +866,69 @@
          </widget>
         </item>
         <item>
+         <widget class="QWidget" name="wgtIndType" native="true">
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="spacing">
+            <number>-1</number>
+           </property>
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="lblIndType">
+             <property name="text">
+              <string>Indicator type</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rbIndTypeCCTR">
+             <property name="text">
+              <string>Common cathode with transistor switches on digits</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rbIndTypeCCNO">
+             <property name="text">
+              <string>Common cathode with direct connect digits to MCU</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rbIndTypeCATR">
+             <property name="text">
+              <string>Common anode with transistor switches on digits</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rbIndTypeCANO">
+             <property name="text">
+              <string>Common anode with direct connect digits to &amp;MCU</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rbIndTypeNIXIE">
+             <property name="text">
+              <string>NI&amp;XIE vacuum tubes</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <spacer name="vspOther">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -1349,6 +1412,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rbIndTypeCCTR</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setIndType()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbIndTypeCCNO</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setIndType()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>455</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>200</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbIndTypeCATR</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setIndType()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>465</x>
+     <y>228</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>225</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbIndTypeCANO</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setIndType()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>472</x>
+     <y>251</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>250</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbIndTypeNIXIE</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setIndType()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>453</x>
+     <y>277</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openEeprom()</slot>
@@ -1371,5 +1514,6 @@
   <slot>setFmMin(double)</slot>
   <slot>setFmMax(double)</slot>
   <slot>setFmRds(int)</slot>
+  <slot>setIndType()</slot>
  </slots>
 </ui>

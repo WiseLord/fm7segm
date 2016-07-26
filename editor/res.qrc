@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/fm7segm_rda5807.bin</file>
         <file>res/fm7segm.png</file>
+        <file>res/fm7segm.bin</file>
     </qresource>
 </RCC>
