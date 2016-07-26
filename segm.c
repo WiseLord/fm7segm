@@ -519,6 +519,12 @@ void segmTime(void)
 		break;
 	}
 
+#ifdef _NIXIE
+	// Turn off stereo indicator and decimal dot
+	PORT(SEG_P) &= ~SEG_P_LINE;
+	PORT(SEG_F) &= ~SEG_F_LINE;
+#endif
+
 	// Show result
 	uint8_t i;
 	for (i = 0; i < DIGITS; i++)
