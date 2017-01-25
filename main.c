@@ -19,7 +19,7 @@ static void powerOn(void)
 {
 	tunerPowerOn();
 	unmuteVolume();
-	setVolume(getVolume());
+	setVolume(VOL_MAX);
 	setBrightness(brWork);
 	tunerSetFreq();
 
@@ -296,9 +296,10 @@ int main(void)
 				setDisplayTime(DISPLAY_TIME_BRIGHTNESS);
 				break;
 			default:
-				dispMode = MODE_VOLUME;
-				setVolume(getVolume() + encCnt);
-				setDisplayTime(DISPLAY_TIME_VOLUME);
+				tunerNextStation(encCnt);
+//				dispMode = MODE_VOLUME;
+//				setVolume(getVolume() + encCnt);
+//				setDisplayTime(DISPLAY_TIME_VOLUME);
 				break;
 			}
 		}

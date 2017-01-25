@@ -98,7 +98,7 @@ void segmInit(void)
 	TIMSK |= (1<<OCIE2);							/* Enable timer compare interrupt */
 
 	encCnt = 0;
-	cmdBuf = CMD_EMPTY;
+	cmdBuf = CMD_BTN_1;
 
 	return;
 }
