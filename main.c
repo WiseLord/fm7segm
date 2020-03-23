@@ -23,12 +23,16 @@ static void powerOn(void)
 	setBrightness(brWork);
 	tunerSetFreq();
 
+	PORT(VOLUME) |= VOLUME_LINE;					/* Add pullup resistor */
+
 	return;
 }
 
 /* Handle entering standby mode */
 static void powerOff(void)
 {
+	PORT(VOLUME) &= ~VOLUME_LINE;					/* Pull amplifier input to ground */
+
 	rtc.etm = RTC_NOEDIT;
 	setBrightness(brStby);
 

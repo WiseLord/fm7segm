@@ -7,11 +7,13 @@
 
 static volatile int8_t vol;
 
+/*
 static const int8_t volPwms[] = {
 	 0, 11, 13, 15, 17, 19, 21,
 	23, 24, 25, 26, 27, 28, 29,
 	30, 31, 32, 33, 34, 35, 36
 };
+*/
 
 void volumeInit(void)
 {
@@ -25,6 +27,7 @@ void volumeInit(void)
 	return;
 }
 
+/*
 ISR (TIMER0_OVF_vect)
 {
 	static uint8_t volPwm;
@@ -40,6 +43,7 @@ ISR (TIMER0_OVF_vect)
 
 	return;
 }
+*/
 
 void setVolume(int8_t value)
 {
@@ -70,12 +74,12 @@ void muteVolume(void)
 	case TUNER_RDA5807_DF:
 		break;
 	default:
-		TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
+//		TIMSK &= ~(1<<TOIE0);							/* Disable timer overflow interrupt */
 		break;
 	}
 
-	DDR(VOLUME) |= VOLUME_LINE;							/* Set as output */
-	PORT(VOLUME) &= ~VOLUME_LINE;						/* Pull amplifier input to ground */
+//	DDR(VOLUME) |= VOLUME_LINE;							/* Set as output */
+//	PORT(VOLUME) &= ~VOLUME_LINE;						/* Pull amplifier input to ground */
 
 	return;
 }
@@ -88,13 +92,13 @@ void unmuteVolume(void)
 	case TUNER_RDA5807:
 	case TUNER_RDA5802:
 	case TUNER_RDA5807_DF:
-		DDR(VOLUME) &= ~VOLUME_LINE;					/* Set as input */
-		PORT(VOLUME) |= VOLUME_LINE;					/* Add pullup resistor */
+//		DDR(VOLUME) &= ~VOLUME_LINE;					/* Set as input */
+//		PORT(VOLUME) |= VOLUME_LINE;					/* Add pullup resistor */
 
 		break;
 	default:
-		DDR(VOLUME) |= VOLUME_LINE;						/* Set as output */
-		TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
+//		DDR(VOLUME) |= VOLUME_LINE;						/* Set as output */
+//		TIMSK |= (1<<TOIE0);							/* Enable timer overflow interrupt */
 		break;
 	}
 
