@@ -1,3 +1,4 @@
+src/.astylerc
 src/ds18x20.c
 src/ds18x20.h
 src/eeprom.h

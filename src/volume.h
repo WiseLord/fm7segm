@@ -3,8 +3,8 @@
 
 #include "pins.h"
 
-#define VOL_MIN				0
-#define VOL_MAX				16
+#define VOL_MIN             0
+#define VOL_MAX             16
 
 void volumeInit(void);
 
