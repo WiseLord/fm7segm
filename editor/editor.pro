@@ -14,6 +14,7 @@ TARGET = fm7segm-editor
 TEMPLATE = app
 
 DEFINES += _TEA5767 _RDA580X _TUX032 _LM7001 _RDS
+INCLUDEPATH += ../src
 
 SOURCES += main.cpp\
     mainwindow.cpp \

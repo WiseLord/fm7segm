@@ -5,10 +5,10 @@
 
 #include "aboutdialog.h"
 
-#include "../eeprom.h"
-#include "../segm.h"
-#include "../tuner/tuner.h"
-#include "../tuner/tea5767.h"
+#include "eeprom.h"
+#include "segm.h"
+#include "tuner/tuner.h"
+#include "tuner/tea5767.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -37,9 +37,9 @@ void MainWindow::updateHexTable(int pos)
     QTableWidgetItem *item = wgtHexTable->item(pos / 16, pos % 16);
     item->setText(eep.mid(pos, 1).toHex().toUpper());
     if (item->text() == "FF")
-        item->setTextColor(Qt::gray);
+        item->setForeground(Qt::gray);
     else
-        item->setTextColor(Qt::black);
+        item->setForeground(Qt::black);
 }
 
 void MainWindow::updateHexTable()
@@ -100,7 +100,7 @@ void MainWindow::openEeprom()
 {
     QString name = QFileDialog::getOpenFileName(this,
                                                 tr("Open eeprom binary"),
-                                                "../eeprom/",
+                                                "../src/eeprom/",
                                                 tr("EEPROM files (*.bin);;All files (*.*)"));
 
     readEepromFile(name);
@@ -115,7 +115,7 @@ void MainWindow::saveEepromAs()
 {
     QString name = QFileDialog::getSaveFileName(this,
                                                 tr("Save eeprom binary"),
-                                                "../eeprom/" + fileName,
+                                                "../src/eeprom/" + fileName,
                                                 tr("EEPROM files (*.bin)"));
 
     if (name.isEmpty())
