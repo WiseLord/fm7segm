@@ -57,7 +57,7 @@ $(ELF): $(OBJS)
 $(HEX): $(ELF)
 	$(OBJCOPY) -O ihex -R .eeprom -R .nwram $(ELF) $(HEX)
 
-size:
+size: $(ELF)
 	@sh ./size.sh $(ELF)
 
 $(BUILDDIR)/%.o: %.c
@@ -72,9 +72,11 @@ clean:
 flash: $(HEX)
 	$(AVRDUDE) $(AD_CMD) -U flash:w:$(HEX):i
 
+.PHONY: eeprom
 eeprom:
 	$(AVRDUDE) $(AD_CMD) -U eeprom:w:eeprom/fm7segm.bin:r
 
+.PHONY: fuse
 fuse:
 	$(AVRDUDE) $(AD_CMD) -U lfuse:w:0x24:m -U hfuse:w:0xC1:m
 
