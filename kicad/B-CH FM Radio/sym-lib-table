@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name fm7segm)(type Legacy)(uri /home/AVR/Projects/fm7segm/kicad/fm7segm.lib)(options "")(descr ""))
+)
