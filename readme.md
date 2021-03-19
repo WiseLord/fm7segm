@@ -1,4 +1,4 @@
-# FM7segm (AVR ATmega8 version)
+# FM7segm
 
 This project is a simple FM radio tuner with 4-digits LED indication.
 Up to 50 FM stations can be stored in EEPROM memory of ATmega8 MCU.
@@ -8,40 +8,36 @@ There is a [video](https://youtu.be/3I_dFwAWISo) on Youtube about this.
 
 ## Main features:
 
-|Feature description                                       |Supported|
-|----------------------------------------------------------|---------|
-|FM radio support                                          |yes      |
-|Up to 60 FM stations can be saved in EEPROM               |yes      |
-|Common cathode indicators with direct connection do digits|yes      |
-|Common anode indicators with direct connection do digits  |yes      |
-|Common cathode indicators with transistor on digits       |yes      |
-|Common anode indicators with transistor on digits         |yes      |
-|Indicator brightness control (12 levels)                  |yes      |
-|RDA580x internal volume control support                   |yes      |
-|PWM volume control on other tuners                        |yes      |
-|RTC DS1307 support (DS323x also are working)              |yes      |
-|Temperature sensors DS18x20                               |yes      |
+- FM radio support
+- Up to 60 FM stations can be saved in EEPROM
+- Common cathode indicators with direct connection do digits
+- Common anode indicators with direct connection do digits
+- Common cathode indicators with transistor on digits
+- Common anode indicators with transistor on digits
+- Indicator brightness control (12 levels)
+- RDA580x internal volume control support
+- PWM volume control on other tuners
+- RTC DS1307 support (DS323x also are working)
+- Temperature sensors DS18x20
 
 ## Supported FM tuners:
 
-|Tuner     |Description                                   |Supported|
-|----------|----------------------------------------------|---------|
-|TEA5767   |I²C FM tuner                                  |yes      |
-|RDA5807   |I²C FM tuner with RDS support                 |yes      |
-|TUX032    |I²C FM tuner found in some Sony car radio     |yes      |
-|LM7001    |SPI-control frequency synthesizer             |yes      |
-|RDA5802   |I²C FM tuner                                  |yes      |
-|RDA5807_DF|Option for RDA5807 with direct frequency input|yes      |
+- TEA5767 - I²C FM tuner
+- RDA5807 - I²C FM tuner with RDS support
+- TUX032 - I²C FM tuner found in some Sony car radios
+- LM700 - SPI-controlled frequency synthesizer
+- RDA5802 - I²C FM tuner
+- RDA5807_DF - Option for RDA5807 with direct frequency input
 
 ## Schematic:
 
 * First pinout:
 
-	![First pinout](https://raw.githubusercontent.com/WiseLord/fm7segm/master/files/fm7segm_pin1_sch.png)
+![First pinout](files/fm7segm_pin1_sch.png)
 
 * Second pinout:
 
-	![Second pinout](https://raw.githubusercontent.com/WiseLord/fm7segm/master/files/fm7segm_pin2_sch.png)
+![Second pinout](files/fm7segm_pin2_sch.png)
 
 Both pinouts can be used with any FM tuner supported and any indicator type and connection combination.
 All this can be configured via Makefile and pins.h files.
