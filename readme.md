@@ -6,6 +6,8 @@ Also, device can show current time and temperature.
 
 There is a [video](https://youtu.be/3I_dFwAWISo) on Youtube about this.
 
+![BikeComp](files/fm7segm.jpg)
+
 ## Main features:
 
 - FM radio support
